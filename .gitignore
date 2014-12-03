@@ -1,0 +1,9 @@
+*.o
+ims-sim
+
+*.toc
+*.aux
+*.out
+*.pdf
+*.tar.gz
+*.log
