@@ -12,7 +12,7 @@
 
 #define MINUTES         60.0
 
-#define BOARDS_PER_REQUEST  1
+#define BOARDS_PER_REQUEST  54795
 
 // SMT
 #define SMT_LINES 18
@@ -28,15 +28,17 @@ unsigned int currentDipLine = 0;
 
 // Testing
 #define TESTING_LINES 9
-Queue testingQueue;
-Machine testingMachines[TESTING_LINES];
+Line testingLines[TESTING_LINES];
+unsigned int currentTestingLine = 0;
 
 // Packing
 #define PACKING_LINES 10
 Line packingLines[PACKING_LINES];
 unsigned int currentPackingLine = 0;
 
+unsigned int boardsRequested = 0;
 unsigned int boardsMade = 0;
+unsigned int boardsSMT = 0;
 
 class Board : public Process
 {
@@ -45,6 +47,7 @@ public:
 
     void Behavior()
     {
+        boardsRequested++;
         TRACE("Nova doska (%u)", _id);
         // SMT
         // Najdi volny screen printer
@@ -78,7 +81,7 @@ public:
         }
 
         TRACE("Doska (%u) zabrala screen printer %d", _id, _linkId);
-        Wait(Uniform(1 * MINUTES, 2 * MINUTES)); // samotny screen printing
+        Wait(Uniform(10, 20)); // samotny screen printing
 
         TRACE("Doska (%u) opustila screen printer %d", _id, _linkId);
         Release(screenPrinters[_linkId]);
@@ -103,6 +106,8 @@ public:
             while (AOI() == false); // pokial doska obsahuje chyby, opravujeme ju
             Priority = 0;   // po prejdeni AOI zniz prioritu
         }
+
+        boardsSMT++;
 
         // DIP
         // zvoli sa jedna DIP linka a dalsia doska pojde do dalsej DIP linky, a tak dokola
@@ -175,35 +180,11 @@ public:
     {
         bool passed = true;
 
-        int i;
-        for (i = 0; i < TESTING_LINES; ++i)
-        {
-            if (!testingMachines[i].Busy())
-            {
-                Seize(testingMachines[i]);
-                break;
-            }
-        }
-        _linkId = i;
+        _linkId = currentTestingLine++;
+        if (currentTestingLine == TESTING_LINES)
+            currentTestingLine = 0;
 
-        // Ak nebol ziadny volny, zarad dosku do fronty
-        if (_linkId == TESTING_LINES)
-        {
-            TRACE("Doska (%u) sa zaradila do Testing fronty lebo nie je nic volne", _id);
-            Into(testingQueue);
-            Passivate();
-
-            // ak sme predtym nenasli volny screen printer, musime zistit, ktory nam bol neskor prideleny
-            for (i = 0; i < TESTING_LINES; ++i)
-            {
-                if (testingMachines[i].in == this)
-                {
-                    _linkId = i;
-                    break;
-                }
-            }
-        }
-
+        Enter(testingLines[_linkId], 1);
         TRACE("Doska (%u) zabrala Testing stroj %d", _id, _linkId);
         Wait(Uniform(1 * MINUTES, 2 * MINUTES)); // Testing proces
 
@@ -214,7 +195,7 @@ public:
         }
 
         TRACE("Doska (%u) opustila Testing machine %d", _id, _linkId);
-        Release(testingMachines[_linkId]);
+        Leave(testingLines[_linkId], 1);
         return passed;
     }
 
@@ -239,7 +220,7 @@ public:
             Print("Day: %d\n", (int)(Time / 86400) + 1);
             day++;
         }
-        Activate(Time + 1.5);
+        Activate(Time + 86400);
     }
 };
 
@@ -265,8 +246,8 @@ int main(int argc, char* argv[])
     // Inicializacia Testing linky
     for (int i = 0; i < TESTING_LINES; ++i)
     {
-        testingMachines[i].SetNameWithNum("Testing Machine", i);
-        testingMachines[i].SetQueue(&testingQueue);
+        testingLines[i].SetNameWithNum("Testing Machine", i);
+        testingLines[i].SetCapacity(50);
     }
 
     // Inicializacia Packing linky
@@ -279,7 +260,7 @@ int main(int argc, char* argv[])
     RandomSeed(time(NULL));
 //    Init(0, 2591999);
 //    Init(0, 604799);
-    Init(0, 86399);
+    Init(0, 1 * 86399);
     (new Generator)->Activate();
     Run();
 
@@ -297,7 +278,7 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < TESTING_LINES; ++i)
     {
-        testingMachines[i].Output();
+        testingLines[i].Output();
     }
 
     for (int i = 0; i < PACKING_LINES; ++i)
@@ -306,7 +287,8 @@ int main(int argc, char* argv[])
     }
 
     smtQueue.Output();
-    testingQueue.Output();
 
+    Print("Boards Requested: %u\n", boardsRequested);
+    Print("Boards SMT: %u\n", boardsSMT);
     Print("Boards Made: %u\n", boardsMade);
 }
