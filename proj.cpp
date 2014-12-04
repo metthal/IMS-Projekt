@@ -12,6 +12,8 @@
 
 #define MINUTES         60.0
 
+#define BOARDS_PER_REQUEST  1
+
 // SMT
 #define SMT_LINES 18
 Queue smtQueue;
@@ -76,14 +78,14 @@ public:
         }
 
         TRACE("Doska (%u) zabrala screen printer %d", _id, _linkId);
-        Wait(2 * MINUTES); // samotny screen printing
+        Wait(Uniform(1 * MINUTES, 2 * MINUTES)); // samotny screen printing
 
         TRACE("Doska (%u) opustila screen printer %d", _id, _linkId);
         Release(screenPrinters[_linkId]);
 
         Seize(pnpMachines[_linkId]); // vstup do odpovedajuceho P&P pristroja
         TRACE("Doska (%u) vstupila do P&P %d", _id, _linkId);
-        Wait(1.5 * MINUTES); // umiestnovanie SMD
+        Wait(Uniform(1 * MINUTES, 1.5 * MINUTES)); // umiestnovanie SMD
         TRACE("Doska (%u) opustila P&P %d", _id, _linkId);
         Release(pnpMachines[_linkId]); // uvolnenie P&P pristroja
 
@@ -156,7 +158,7 @@ public:
 
         Seize(aoiMachines[_linkId]);
         TRACE("Doska (%u) vstupila do AOI %d", _id, _linkId);
-        Wait(12); // AOI proces
+        Wait(Uniform(6, 12)); // AOI proces
 
         if (Uniform(0, 100) < 1) // 1% pravdepodobnost chyby
         {
@@ -203,9 +205,9 @@ public:
         }
 
         TRACE("Doska (%u) zabrala Testing stroj %d", _id, _linkId);
-        Wait(5 * MINUTES); // Testing proces
+        Wait(Uniform(1 * MINUTES, 2 * MINUTES)); // Testing proces
 
-        if (Uniform(0, 100) < 2) // 2% pravdepodobnost chyby
+        if (Uniform(0, 100) < 1) // 1% pravdepodobnost chyby
         {
             TRACE("Doska (%u) nepresla cez Testing machine %d", _id, _linkId);
             passed = false;
@@ -229,7 +231,8 @@ class Generator : public Event
 public:
     void Behavior()
     {
-        (new Board)->Activate();
+        for (int i = 0; i < BOARDS_PER_REQUEST; ++i)
+            (new Board)->Activate();
         // pre vyrobenie 21 milionov dosiek za rok je potrebe poziadavok na vyrobu dosky kazdych ~1.5 sekundy
         if ((int)(Time / 86400) != day)
         {
@@ -274,15 +277,36 @@ int main(int argc, char* argv[])
     }
 
     RandomSeed(time(NULL));
-    Init(0, 31535999);
+//    Init(0, 2591999);
+//    Init(0, 604799);
+    Init(0, 86399);
     (new Generator)->Activate();
     Run();
 
-/*    for (int i = 0; i < SMT_LINES; ++i)
+    for (int i = 0; i < SMT_LINES; ++i)
     {
         screenPrinters[i].Output();
         pnpMachines[i].Output();
-    }*/
+        aoiMachines[i].Output();
+    }
+
+    for (int i = 0; i < DIP_LINES; ++i)
+    {
+        dipLines[i].Output();
+    }
+
+    for (int i = 0; i < TESTING_LINES; ++i)
+    {
+        testingMachines[i].Output();
+    }
+
+    for (int i = 0; i < PACKING_LINES; ++i)
+    {
+        packingLines[i].Output();
+    }
+
+    smtQueue.Output();
+    testingQueue.Output();
 
     Print("Boards Made: %u\n", boardsMade);
 }
