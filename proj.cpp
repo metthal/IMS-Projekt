@@ -3,36 +3,38 @@
 #include "machine.h"
 #include "line.h"
 
-#define TRACE_ENABLE
+//#define TRACE_ENABLE
 #ifdef TRACE_ENABLE
     #define TRACE(fmt, ...)     Print("%.3f: ", Time); Print(fmt, ##__VA_ARGS__); Print("\n")
 #else
     #define TRACE(fmt, ...)     (void)fmt
 #endif
 
-#define BOARDS_PER_REQUEST      1
+#define MINUTES         60.0
 
 // SMT
-#define SMT_LINES 1
+#define SMT_LINES 18
 Queue smtQueue;
 Machine screenPrinters[SMT_LINES];
 Machine pnpMachines[SMT_LINES];
 Machine aoiMachines[SMT_LINES];
 
 // DIP
-#define DIP_LINES 1
+#define DIP_LINES 10
 Line dipLines[DIP_LINES];
 unsigned int currentDipLine = 0;
 
 // Testing
-#define TESTING_LINES 2
+#define TESTING_LINES 9
 Queue testingQueue;
 Machine testingMachines[TESTING_LINES];
 
 // Packing
-#define PACKING_LINES 1
+#define PACKING_LINES 10
 Line packingLines[PACKING_LINES];
 unsigned int currentPackingLine = 0;
+
+unsigned int boardsMade = 0;
 
 class Board : public Process
 {
@@ -74,19 +76,19 @@ public:
         }
 
         TRACE("Doska (%u) zabrala screen printer %d", _id, _linkId);
-        Wait(5); // TODO: samotny screen printing
+        Wait(2 * MINUTES); // samotny screen printing
 
         TRACE("Doska (%u) opustila screen printer %d", _id, _linkId);
         Release(screenPrinters[_linkId]);
 
         Seize(pnpMachines[_linkId]); // vstup do odpovedajuceho P&P pristroja
         TRACE("Doska (%u) vstupila do P&P %d", _id, _linkId);
-        Wait(3.5); // umiestnovanie SMD
+        Wait(1.5 * MINUTES); // umiestnovanie SMD
         TRACE("Doska (%u) opustila P&P %d", _id, _linkId);
         Release(pnpMachines[_linkId]); // uvolnenie P&P pristroja
 
         TRACE("Doska (%u) vstupila do reflow oven", _id);
-        Wait(3); // Reflow Oven
+        Wait(5 * MINUTES); // Reflow Oven
         TRACE("Doska (%u) opustila reflow oven", _id);
 
         if (AOI() == false) // pokial doska nepresla cez AOI
@@ -94,7 +96,7 @@ public:
             Priority = 1;   // zvys prioritu
             do
             {
-                Wait(4);    // oprava dosky
+                Wait(Exponential(6 * MINUTES)); // oprava dosky
             }
             while (AOI() == false); // pokial doska obsahuje chyby, opravujeme ju
             Priority = 0;   // po prejdeni AOI zniz prioritu
@@ -111,7 +113,7 @@ public:
         TRACE("Doska (%u) vstupila na DIP linku %d", _id, _linkId);
 
         // prechod cez DIP link + wave oven
-        Wait(6);
+        Wait(2 * MINUTES);
 
         // opustame pas
         TRACE("Doska (%u) opustila DIP linku %d", _id, _linkId);
@@ -123,7 +125,7 @@ public:
             Priority = 1; // zvysena priorita pre opravene dosky
             do
             {
-                Wait(4); // oprava dosky
+                Wait(Exponential(3 * MINUTES)); // oprava dosky
             }
             while (Testing() == false);
             Priority = 0; // opat znizime prioritu
@@ -139,11 +141,13 @@ public:
         TRACE("Doska (%u) vstupila na baliacu linku %d", _id, _linkId);
 
         // balenie
-        Wait(2);
+        Wait(3 * MINUTES);
 
         // opustame pas
         TRACE("Doska (%u) opustila baliacu linku %d", _id, _linkId);
         Leave(packingLines[_linkId], 1);
+
+        boardsMade++;
     }
 
     bool AOI()
@@ -152,9 +156,9 @@ public:
 
         Seize(aoiMachines[_linkId]);
         TRACE("Doska (%u) vstupila do AOI %d", _id, _linkId);
-        Wait(2); // AOI proces
+        Wait(12); // AOI proces
 
-        if (Uniform(0, 100) < 5) // 5% pravdepodobnost chyby
+        if (Uniform(0, 100) < 1) // 1% pravdepodobnost chyby
         {
             TRACE("Doska (%u) nepresla AOI %d", _id, _linkId);
             passed = false;
@@ -199,9 +203,9 @@ public:
         }
 
         TRACE("Doska (%u) zabrala Testing stroj %d", _id, _linkId);
-        Wait(2); // Testing proces
+        Wait(5 * MINUTES); // Testing proces
 
-        if (Uniform(0, 100) < 3) // 3% pravdepodobnost chyby
+        if (Uniform(0, 100) < 2) // 2% pravdepodobnost chyby
         {
             TRACE("Doska (%u) nepresla cez Testing machine %d", _id, _linkId);
             passed = false;
@@ -219,14 +223,20 @@ private:
 };
 
 // Generator poziadavkov na vyrobu
+int day = -1;
 class Generator : public Event
 {
 public:
     void Behavior()
     {
-        for (int i = 0; i < BOARDS_PER_REQUEST; ++i) // pocet dosiek v jednej poziadavke na vyrobu
-            (new Board)->Activate();
-        Activate(Time + 1); // TODO: fixnut tuto konstantu
+        (new Board)->Activate();
+        // pre vyrobenie 21 milionov dosiek za rok je potrebe poziadavok na vyrobu dosky kazdych ~1.5 sekundy
+        if ((int)(Time / 86400) != day)
+        {
+            Print("Day: %d\n", (int)(Time / 86400) + 1);
+            day++;
+        }
+        Activate(Time + 1.5);
     }
 };
 
@@ -246,7 +256,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < DIP_LINES; ++i)
     {
         dipLines[i].SetNameWithNum("DIP Line", i);
-        dipLines[i].SetCapacity(3);
+        dipLines[i].SetCapacity(50);
     }
 
     // Inicializacia Testing linky
@@ -260,11 +270,11 @@ int main(int argc, char* argv[])
     for (int i = 0; i < PACKING_LINES; ++i)
     {
         packingLines[i].SetNameWithNum("Packing Line", i);
-        packingLines[i].SetCapacity(3);
+        packingLines[i].SetCapacity(50);
     }
 
     RandomSeed(time(NULL));
-    Init(0, 99);
+    Init(0, 31535999);
     (new Generator)->Activate();
     Run();
 
@@ -273,4 +283,6 @@ int main(int argc, char* argv[])
         screenPrinters[i].Output();
         pnpMachines[i].Output();
     }*/
+
+    Print("Boards Made: %u\n", boardsMade);
 }
