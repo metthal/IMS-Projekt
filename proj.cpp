@@ -13,22 +13,26 @@
 #define BOARDS_PER_REQUEST      1
 
 // SMT
-#define SMT_LINES               1
+#define SMT_LINES 1
 Queue smtQueue;
 Machine screenPrinters[SMT_LINES];
 Machine pnpMachines[SMT_LINES];
 Machine aoiMachines[SMT_LINES];
 
 // DIP
-#define DIP_LINES               1
+#define DIP_LINES 1
 Line dipLines[DIP_LINES];
+unsigned int currentDipLine = 0;
 
 // Testing
-#define TESTING_LINES           2
+#define TESTING_LINES 2
 Queue testingQueue;
 Machine testingMachines[TESTING_LINES];
 
-unsigned int currentDipLine = 0;
+// Packing
+#define PACKING_LINES 1
+Line packingLines[PACKING_LINES];
+unsigned int currentPackingLine = 0;
 
 class Board : public Process
 {
@@ -37,7 +41,7 @@ public:
 
     void Behavior()
     {
-TRACE("Nova doska (%u)", _id);
+        TRACE("Nova doska (%u)", _id);
         // SMT
         // Najdi volny screen printer
         int i;
@@ -124,6 +128,22 @@ TRACE("Nova doska (%u)", _id);
             while (Testing() == false);
             Priority = 0; // opat znizime prioritu
         }
+
+        // Packing
+        _linkId = currentPackingLine++;
+        if (currentPackingLine == PACKING_LINES)
+            currentPackingLine = 0;
+
+        // vstup
+        Enter(packingLines[_linkId], 1);
+        TRACE("Doska (%u) vstupila na baliacu linku %d", _id, _linkId);
+
+        // balenie
+        Wait(2);
+
+        // opustame pas
+        TRACE("Doska (%u) opustila baliacu linku %d", _id, _linkId);
+        Leave(packingLines[_linkId], 1);
     }
 
     bool AOI()
@@ -234,6 +254,13 @@ int main(int argc, char* argv[])
     {
         testingMachines[i].SetNameWithNum("Testing Machine", i);
         testingMachines[i].SetQueue(&testingQueue);
+    }
+
+    // Inicializacia Packing linky
+    for (int i = 0; i < PACKING_LINES; ++i)
+    {
+        packingLines[i].SetNameWithNum("Packing Line", i);
+        packingLines[i].SetCapacity(3);
     }
 
     RandomSeed(time(NULL));
