@@ -268,6 +268,12 @@ int main(int argc, char* argv[])
             i += 2;
             continue;
         }
+        else if (strcmp(argv[i], "--out") == 0)
+        {
+            SetOutput(argv[i + 1]);
+            i += 1;
+            continue;
+        }
     }
 
     // Inicializacia pristrojov v SMT linke
@@ -314,8 +320,8 @@ int main(int argc, char* argv[])
         packingLines[i]->SetCapacity(30);
     }
 
-    RandomSeed(time(NULL));
     Init(0, 24 * HOURS - 1); // 1 den
+    RandomSeed(time(NULL));
     (new Generator)->Activate();
     Run();
 
