@@ -1,4 +1,6 @@
 #include <ctime>
+#include <cstring>
+#include <vector>
 #include <simlib.h>
 #include "machine.h"
 #include "line.h"
@@ -12,28 +14,30 @@
 
 #define MINUTES         60.0
 
-#define BOARDS_PER_REQUEST  19179
+unsigned int REQUEST_PER_DAY = 19179;
 
 // SMT
-#define SMT_LINES 18
+unsigned int SMT_LINES = 18;
 Queue smtQueue;
-Machine screenPrinters[SMT_LINES];
-Machine pnpMachines[SMT_LINES];
-Machine aoiMachines[SMT_LINES];
+std::vector<Machine*> screenPrinters;
+std::vector<std::vector<Machine*> > pnpMachines;
+std::vector<Machine*> aoiMachines;
+unsigned int PNP_PER_LINE = 1;
+std::vector<Queue*> pnpQueues;
 
 // DIP
-#define DIP_LINES 10
-Line dipLines[DIP_LINES];
+unsigned int DIP_LINES = 10;
+std::vector<Line*> dipLines;
 unsigned int currentDipLine = 0;
 
 // Testing
-#define TESTING_LINES 9
-Line testingLines[TESTING_LINES];
+unsigned int TESTING_LINES = 9;
+std::vector<Line*> testingLines;
 unsigned int currentTestingLine = 0;
 
 // Packing
-#define PACKING_LINES 10
-Line packingLines[PACKING_LINES];
+unsigned int PACKING_LINES = 10;
+std::vector<Line*> packingLines;
 unsigned int currentPackingLine = 0;
 
 unsigned int boardsRequested = 0;
@@ -51,12 +55,12 @@ public:
         TRACE("Nova doska (%u)", _id);
         // SMT
         // Najdi volny screen printer
-        int i;
+        unsigned int i;
         for (i = 0; i < SMT_LINES; ++i)
         {
-            if (!screenPrinters[i].Busy())
+            if (!screenPrinters[i]->Busy())
             {
-                Seize(screenPrinters[i]);
+                Seize(*screenPrinters[i]);
                 break;
             }
         }
@@ -72,7 +76,7 @@ public:
             // ak sme predtym nenasli volny screen printer, musime zistit, ktory nam bol neskor prideleny
             for (i = 0; i < SMT_LINES; ++i)
             {
-                if (screenPrinters[i].in == this)
+                if (screenPrinters[i]->in == this)
                 {
                     _linkId = i;
                     break;
@@ -84,13 +88,39 @@ public:
         Wait(Uniform(30, 45)); // samotny screen printing
 
         TRACE("Doska (%u) opustila screen printer %d", _id, _linkId);
-        Release(screenPrinters[_linkId]);
+        Release(*screenPrinters[_linkId]);
 
-        Seize(pnpMachines[_linkId]); // vstup do odpovedajuceho P&P pristroja
-        TRACE("Doska (%u) vstupila do P&P %d", _id, _linkId);
+        for (i = 0; i < PNP_PER_LINE; ++i)
+        {
+            if (!pnpMachines[_linkId][i]->Busy())
+            {
+                // vstup do odpovedajuceho P&P pristroja
+                TRACE("Doska (%u) vstupila do P&P %d:%d (%d)", _id, _linkId, i, _linkId * PNP_PER_LINE + i);
+                Seize(*pnpMachines[_linkId][i]);
+                break;
+            }
+        }
+
+        // ziadny P&P pristroj nie je volny
+        if (i == PNP_PER_LINE)
+        {
+            Into(*pnpQueues[_linkId]);
+            Passivate();
+
+            // najdeme pristroj ktoremu patri doska
+            for (i = 0; i < PNP_PER_LINE; ++i)
+            {
+                if (pnpMachines[_linkId][i]->in == this)
+                {
+                    TRACE("Doska (%u) vstupila do P&P %d:%d (%d)", _id, _linkId, i, _linkId * PNP_PER_LINE + i);
+                    break;
+                }
+            }
+        }
+
         Wait(Uniform(1 * MINUTES, 1.5 * MINUTES)); // umiestnovanie SMD
         TRACE("Doska (%u) opustila P&P %d", _id, _linkId);
-        Release(pnpMachines[_linkId]); // uvolnenie P&P pristroja
+        Release(*pnpMachines[_linkId][i]); // uvolnenie P&P pristroja
 
         TRACE("Doska (%u) vstupila do reflow oven", _id);
         Wait(5 * MINUTES); // Reflow Oven
@@ -116,7 +146,7 @@ public:
             currentDipLine = 0;
 
         // vstup
-        Enter(dipLines[_linkId], 1);
+        Enter(*dipLines[_linkId], 1);
         TRACE("Doska (%u) vstupila na DIP linku %d", _id, _linkId);
 
         // prechod cez DIP link + wave oven
@@ -124,7 +154,7 @@ public:
 
         // opustame pas
         TRACE("Doska (%u) opustila DIP linku %d", _id, _linkId);
-        Leave(dipLines[_linkId], 1);
+        Leave(*dipLines[_linkId], 1);
 
         // Testing
         if (Testing() == false)
@@ -144,7 +174,7 @@ public:
             currentPackingLine = 0;
 
         // vstup
-        Enter(packingLines[_linkId], 1);
+        Enter(*packingLines[_linkId], 1);
         TRACE("Doska (%u) vstupila na baliacu linku %d", _id, _linkId);
 
         // balenie
@@ -152,7 +182,7 @@ public:
 
         // opustame pas
         TRACE("Doska (%u) opustila baliacu linku %d", _id, _linkId);
-        Leave(packingLines[_linkId], 1);
+        Leave(*packingLines[_linkId], 1);
 
         boardsMade++;
     }
@@ -161,7 +191,7 @@ public:
     {
         bool passed = true;
 
-        Seize(aoiMachines[_linkId]);
+        Seize(*aoiMachines[_linkId]);
         TRACE("Doska (%u) vstupila do AOI %d", _id, _linkId);
         Wait(Uniform(6, 12)); // AOI proces
 
@@ -172,7 +202,7 @@ public:
         }
 
         TRACE("Doska (%u) opustila AOI %d", _id, _linkId);
-        Release(aoiMachines[_linkId]);
+        Release(*aoiMachines[_linkId]);
         return passed;
     }
 
@@ -184,7 +214,7 @@ public:
         if (currentTestingLine == TESTING_LINES)
             currentTestingLine = 0;
 
-        Enter(testingLines[_linkId], 1);
+        Enter(*testingLines[_linkId], 1);
         TRACE("Doska (%u) zabrala Testing stroj %d", _id, _linkId);
         Wait(Uniform(1 * MINUTES, 2 * MINUTES)); // Testing proces
 
@@ -195,7 +225,7 @@ public:
         }
 
         TRACE("Doska (%u) opustila Testing machine %d", _id, _linkId);
-        Leave(testingLines[_linkId], 1);
+        Leave(*testingLines[_linkId], 1);
         return passed;
     }
 
@@ -212,7 +242,7 @@ class Generator : public Event
 public:
     void Behavior()
     {
-        for (int i = 0; i < BOARDS_PER_REQUEST; ++i)
+        for (unsigned int i = 0; i < REQUEST_PER_DAY; ++i)
             (new Board)->Activate();
         // pre vyrobenie 21 milionov dosiek za rok je potrebe poziadavok na vyrobu dosky kazdych ~1.5 sekundy
         if ((int)(Time / 86400) != day)
@@ -227,34 +257,96 @@ public:
 unsigned int Board::IDFactory = 0;
 int main(int argc, char* argv[])
 {
-    // Inicializacia pristrojov v SMT linke
-    for (int i = 0; i < SMT_LINES; ++i)
+    // velmi primitivne spracovanie parametrov len pre testovacie ucely
+    for (int i = 1; i < argc; ++i)
     {
-        screenPrinters[i].SetNameWithNum("Solder Paste Screen Printer", i);
-        screenPrinters[i].SetQueue(&smtQueue);
-        pnpMachines[i].SetNameWithNum("Pick & Place Machine", i);
-        aoiMachines[i].SetNameWithNum("AOI Machine", i);
+        if (strcmp(argv[i], "--pnp") == 0)
+        {
+            PNP_PER_LINE = std::atoi(argv[i + 1]);
+            i += 1;
+            continue;
+        }
+        else if (strcmp(argv[i], "--smt") == 0)
+        {
+            SMT_LINES = std::atoi(argv[i + 1]);
+            i += 1;
+            continue;
+        }
+        else if (strcmp(argv[i], "--dip") == 0)
+        {
+            DIP_LINES = std::atoi(argv[i + 1]);
+            i += 1;
+            continue;
+        }
+        else if (strcmp(argv[i], "--tst") == 0)
+        {
+            TESTING_LINES = std::atoi(argv[i + 1]);
+            i += 1;
+            continue;
+        }
+        else if (strcmp(argv[i], "--pkg") == 0)
+        {
+            PACKING_LINES = std::atoi(argv[i + 1]);
+            i += 1;
+            continue;
+        }
+        else if (strcmp(argv[i], "--req") == 0)
+        {
+            REQUEST_PER_DAY = std::atoi(argv[i + 1]);
+            i += 1;
+            continue;
+        }
+    }
+
+    // Inicializacia pristrojov v SMT linke
+    screenPrinters.resize(SMT_LINES);
+    pnpMachines.resize(SMT_LINES);
+    aoiMachines.resize(SMT_LINES);
+    pnpQueues.resize(SMT_LINES);
+    for (unsigned int i = 0; i < SMT_LINES; ++i)
+    {
+        screenPrinters[i] = new Machine;
+        screenPrinters[i]->SetNameWithNum("Solder Paste Screen Printer", i);
+        screenPrinters[i]->SetQueue(&smtQueue);
+
+        pnpQueues[i] = new Queue("Pick & Place Queue");
+        pnpMachines[i].resize(PNP_PER_LINE);
+        for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
+        {
+            pnpMachines[i][j] = new Machine;
+            pnpMachines[i][j]->SetNameWithNum("Pick & Place Machine", i * PNP_PER_LINE + j);
+            pnpMachines[i][j]->SetQueue(pnpQueues[i]);
+        }
+
+        aoiMachines[i] = new Machine;
+        aoiMachines[i]->SetNameWithNum("AOI Machine", i);
     }
 
     // Inicializacia DIP linky
-    for (int i = 0; i < DIP_LINES; ++i)
+    dipLines.resize(DIP_LINES);
+    for (unsigned int i = 0; i < DIP_LINES; ++i)
     {
-        dipLines[i].SetNameWithNum("DIP Line", i);
-        dipLines[i].SetCapacity(50);
+        dipLines[i] = new Line;
+        dipLines[i]->SetNameWithNum("DIP Line", i);
+        dipLines[i]->SetCapacity(50);
     }
 
     // Inicializacia Testing linky
-    for (int i = 0; i < TESTING_LINES; ++i)
+    testingLines.resize(TESTING_LINES);
+    for (unsigned int i = 0; i < TESTING_LINES; ++i)
     {
-        testingLines[i].SetNameWithNum("Testing Machine", i);
-        testingLines[i].SetCapacity(50);
+        testingLines[i] = new Line;
+        testingLines[i]->SetNameWithNum("Testing Line", i);
+        testingLines[i]->SetCapacity(50);
     }
 
     // Inicializacia Packing linky
-    for (int i = 0; i < PACKING_LINES; ++i)
+    packingLines.resize(PACKING_LINES);
+    for (unsigned int i = 0; i < PACKING_LINES; ++i)
     {
-        packingLines[i].SetNameWithNum("Packing Line", i);
-        packingLines[i].SetCapacity(50);
+        packingLines[i] = new Line;
+        packingLines[i]->SetNameWithNum("Packing Line", i);
+        packingLines[i]->SetCapacity(50);
     }
 
     RandomSeed(time(NULL));
@@ -262,26 +354,29 @@ int main(int argc, char* argv[])
     (new Generator)->Activate();
     Run();
 
-    for (int i = 0; i < SMT_LINES; ++i)
+    for (unsigned int i = 0; i < SMT_LINES; ++i)
     {
-        screenPrinters[i].Output();
-        pnpMachines[i].Output();
-        aoiMachines[i].Output();
+        screenPrinters[i]->Output();
+        for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
+        {
+            pnpMachines[i][j]->Output();
+        }
+        aoiMachines[i]->Output();
     }
 
-    for (int i = 0; i < DIP_LINES; ++i)
+    for (unsigned int i = 0; i < DIP_LINES; ++i)
     {
-        dipLines[i].Output();
+        dipLines[i]->Output();
     }
 
-    for (int i = 0; i < TESTING_LINES; ++i)
+    for (unsigned int i = 0; i < TESTING_LINES; ++i)
     {
-        testingLines[i].Output();
+        testingLines[i]->Output();
     }
 
-    for (int i = 0; i < PACKING_LINES; ++i)
+    for (unsigned int i = 0; i < PACKING_LINES; ++i)
     {
-        packingLines[i].Output();
+        packingLines[i]->Output();
     }
 
     Print("Fronta u SMT linky\n");
