@@ -18,7 +18,7 @@ unsigned int REQUEST_PER_DAY = 19179;
 
 // SMT
 unsigned int SMT_LINES = 18;
-Queue smtQueue;
+Queue smtQueue("SMT Fronta");
 std::vector<Machine*> screenPrinters;
 std::vector<std::vector<Machine*> > pnpMachines;
 std::vector<Machine*> aoiMachines;
@@ -350,7 +350,7 @@ int main(int argc, char* argv[])
     }
 
     RandomSeed(time(NULL));
-    Init(0,  86399); // 1 den
+    Init(0, 86399); // 1 den
     (new Generator)->Activate();
     Run();
 
@@ -358,9 +358,7 @@ int main(int argc, char* argv[])
     {
         screenPrinters[i]->Output();
         for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
-        {
             pnpMachines[i][j]->Output();
-        }
         aoiMachines[i]->Output();
     }
 
@@ -379,10 +377,33 @@ int main(int argc, char* argv[])
         packingLines[i]->Output();
     }
 
-    Print("Fronta u SMT linky\n");
     smtQueue.Output();
 
     Print("Boards Requested: %u\n", boardsRequested);
     Print("Boards SMT: %u\n", boardsSMT);
     Print("Boards Made: %u\n", boardsMade);
+
+    for (unsigned int i = 0; i < SMT_LINES; ++i)
+    {
+        delete screenPrinters[i];
+        delete pnpQueues[i];
+        for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
+            delete pnpMachines[i][j];
+        delete aoiMachines[i];
+    }
+
+    for (unsigned int i = 0; i < DIP_LINES; ++i)
+    {
+        delete dipLines[i];
+    }
+
+    for (unsigned int i = 0; i < TESTING_LINES; ++i)
+    {
+        delete testingLines[i];
+    }
+
+    for (unsigned int i = 0; i < PACKING_LINES; ++i)
+    {
+        delete packingLines[i];
+    }
 }
