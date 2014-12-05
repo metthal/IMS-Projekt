@@ -5,7 +5,7 @@
 #include "machine.h"
 #include "line.h"
 
-//#define TRACE_ENABLE
+#define TRACE_ENABLE
 #ifdef TRACE_ENABLE
     #define TRACE(fmt, ...)     Print("%.3f: ", Time); Print(fmt, ##__VA_ARGS__); Print("\n")
 #else
@@ -235,8 +235,8 @@ private:
     static unsigned int IDFactory;
 };
 
-// Generator poziadavkov na vyrobu
 int day = -1;
+// Generator poziadavkov na vyrobu
 class Generator : public Event
 {
 public:
@@ -359,6 +359,7 @@ int main(int argc, char* argv[])
         screenPrinters[i]->Output();
         for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
             pnpMachines[i][j]->Output();
+        pnpQueues[i]->Output();
         aoiMachines[i]->Output();
     }
 
@@ -383,6 +384,7 @@ int main(int argc, char* argv[])
     Print("Boards SMT: %u\n", boardsSMT);
     Print("Boards Made: %u\n", boardsMade);
 
+    // Upraceme si pamat
     for (unsigned int i = 0; i < SMT_LINES; ++i)
     {
         delete screenPrinters[i];
