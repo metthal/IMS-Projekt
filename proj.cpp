@@ -12,7 +12,7 @@
 
 #define MINUTES         60.0
 
-#define BOARDS_PER_REQUEST  54795
+#define BOARDS_PER_REQUEST  19179
 
 // SMT
 #define SMT_LINES 18
@@ -81,7 +81,7 @@ public:
         }
 
         TRACE("Doska (%u) zabrala screen printer %d", _id, _linkId);
-        Wait(Uniform(10, 20)); // samotny screen printing
+        Wait(Uniform(30, 45)); // samotny screen printing
 
         TRACE("Doska (%u) opustila screen printer %d", _id, _linkId);
         Release(screenPrinters[_linkId]);
@@ -258,9 +258,7 @@ int main(int argc, char* argv[])
     }
 
     RandomSeed(time(NULL));
-//    Init(0, 2591999);
-//    Init(0, 604799);
-    Init(0, 1 * 86399);
+    Init(0,  86399); // 1 den
     (new Generator)->Activate();
     Run();
 
@@ -286,6 +284,7 @@ int main(int argc, char* argv[])
         packingLines[i].Output();
     }
 
+    Print("Fronta u SMT linky\n");
     smtQueue.Output();
 
     Print("Boards Requested: %u\n", boardsRequested);
