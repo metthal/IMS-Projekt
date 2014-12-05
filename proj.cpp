@@ -23,6 +23,8 @@ Queue smtQueue("SMT Fronta");
 std::vector<Machine*> screenPrinters;
 std::vector<Machine*> pnpMachines;
 std::vector<Machine*> aoiMachines;
+double minPnpTime = 1 * MINUTES;
+double maxPnpTime = 1.5 * MINUTES;
 
 // DIP
 unsigned int DIP_LINES = 10;
@@ -92,7 +94,7 @@ public:
         Seize(*pnpMachines[_linkId]);
         TRACE("Doska (%u) vstupila do P&P %d:%d (%d)", _id, _linkId, i, _linkId * PNP_PER_LINE + i);
 
-        Wait(Uniform(1 * MINUTES, 1.5 * MINUTES)); // umiestnovanie SMD
+        Wait(Uniform(minPnpTime, maxPnpTime)); // umiestnovanie SMD
 
         TRACE("Doska (%u) opustila P&P %d", _id, _linkId);
         Release(*pnpMachines[_linkId]); // uvolnenie P&P pristroja
@@ -257,6 +259,13 @@ int main(int argc, char* argv[])
         {
             REQUEST_PER_DAY = std::atoi(argv[i + 1]);
             i += 1;
+            continue;
+        }
+        else if (strcmp(argv[i], "--pnp") == 0)
+        {
+            minPnpTime = std::atof(argv[i + 1]);
+            maxPnpTime = std::atof(argv[i + 2]);
+            i += 2;
             continue;
         }
     }
