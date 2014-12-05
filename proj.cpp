@@ -5,7 +5,7 @@
 #include "machine.h"
 #include "line.h"
 
-#define TRACE_ENABLE
+//#define TRACE_ENABLE
 #ifdef TRACE_ENABLE
     #define TRACE(fmt, ...)     Print("%.3f: ", Time); Print(fmt, ##__VA_ARGS__); Print("\n")
 #else
@@ -13,6 +13,7 @@
 #endif
 
 #define MINUTES         60.0
+#define HOURS           3600.0
 
 unsigned int REQUEST_PER_DAY = 19179;
 
@@ -20,10 +21,8 @@ unsigned int REQUEST_PER_DAY = 19179;
 unsigned int SMT_LINES = 18;
 Queue smtQueue("SMT Fronta");
 std::vector<Machine*> screenPrinters;
-std::vector<std::vector<Machine*> > pnpMachines;
+std::vector<Machine*> pnpMachines;
 std::vector<Machine*> aoiMachines;
-unsigned int PNP_PER_LINE = 1;
-std::vector<Queue*> pnpQueues;
 
 // DIP
 unsigned int DIP_LINES = 10;
@@ -90,37 +89,13 @@ public:
         TRACE("Doska (%u) opustila screen printer %d", _id, _linkId);
         Release(*screenPrinters[_linkId]);
 
-        for (i = 0; i < PNP_PER_LINE; ++i)
-        {
-            if (!pnpMachines[_linkId][i]->Busy())
-            {
-                // vstup do odpovedajuceho P&P pristroja
-                TRACE("Doska (%u) vstupila do P&P %d:%d (%d)", _id, _linkId, i, _linkId * PNP_PER_LINE + i);
-                Seize(*pnpMachines[_linkId][i]);
-                break;
-            }
-        }
-
-        // ziadny P&P pristroj nie je volny
-        if (i == PNP_PER_LINE)
-        {
-            Into(*pnpQueues[_linkId]);
-            Passivate();
-
-            // najdeme pristroj ktoremu patri doska
-            for (i = 0; i < PNP_PER_LINE; ++i)
-            {
-                if (pnpMachines[_linkId][i]->in == this)
-                {
-                    TRACE("Doska (%u) vstupila do P&P %d:%d (%d)", _id, _linkId, i, _linkId * PNP_PER_LINE + i);
-                    break;
-                }
-            }
-        }
+        Seize(*pnpMachines[_linkId]);
+        TRACE("Doska (%u) vstupila do P&P %d:%d (%d)", _id, _linkId, i, _linkId * PNP_PER_LINE + i);
 
         Wait(Uniform(1 * MINUTES, 1.5 * MINUTES)); // umiestnovanie SMD
+
         TRACE("Doska (%u) opustila P&P %d", _id, _linkId);
-        Release(*pnpMachines[_linkId][i]); // uvolnenie P&P pristroja
+        Release(*pnpMachines[_linkId]); // uvolnenie P&P pristroja
 
         TRACE("Doska (%u) vstupila do reflow oven", _id);
         Wait(5 * MINUTES); // Reflow Oven
@@ -178,7 +153,7 @@ public:
         TRACE("Doska (%u) vstupila na baliacu linku %d", _id, _linkId);
 
         // balenie
-        Wait(3 * MINUTES);
+        Wait(Uniform(40, 60));
 
         // opustame pas
         TRACE("Doska (%u) opustila baliacu linku %d", _id, _linkId);
@@ -193,7 +168,7 @@ public:
 
         Seize(*aoiMachines[_linkId]);
         TRACE("Doska (%u) vstupila do AOI %d", _id, _linkId);
-        Wait(Uniform(6, 12)); // AOI proces
+        Wait(Uniform(10, 14)); // AOI proces
 
         if (Uniform(0, 100) < 1) // 1% pravdepodobnost chyby
         {
@@ -216,7 +191,7 @@ public:
 
         Enter(*testingLines[_linkId], 1);
         TRACE("Doska (%u) zabrala Testing stroj %d", _id, _linkId);
-        Wait(Uniform(1 * MINUTES, 2 * MINUTES)); // Testing proces
+        Wait(Exponential(2 * MINUTES)); // Testing proces
 
         if (Uniform(0, 100) < 1) // 1% pravdepodobnost chyby
         {
@@ -235,7 +210,6 @@ private:
     static unsigned int IDFactory;
 };
 
-int day = -1;
 // Generator poziadavkov na vyrobu
 class Generator : public Event
 {
@@ -244,13 +218,8 @@ public:
     {
         for (unsigned int i = 0; i < REQUEST_PER_DAY; ++i)
             (new Board)->Activate();
-        // pre vyrobenie 21 milionov dosiek za rok je potrebe poziadavok na vyrobu dosky kazdych ~1.5 sekundy
-        if ((int)(Time / 86400) != day)
-        {
-            Print("Day: %d\n", (int)(Time / 86400) + 1);
-            day++;
-        }
-        Activate(Time + 86400);
+
+        Activate(Time + 24 * HOURS); // poziadavok na vyrobu kazdy den
     }
 };
 
@@ -260,13 +229,7 @@ int main(int argc, char* argv[])
     // velmi primitivne spracovanie parametrov len pre testovacie ucely
     for (int i = 1; i < argc; ++i)
     {
-        if (strcmp(argv[i], "--pnp") == 0)
-        {
-            PNP_PER_LINE = std::atoi(argv[i + 1]);
-            i += 1;
-            continue;
-        }
-        else if (strcmp(argv[i], "--smt") == 0)
+        if (strcmp(argv[i], "--smt") == 0)
         {
             SMT_LINES = std::atoi(argv[i + 1]);
             i += 1;
@@ -302,21 +265,14 @@ int main(int argc, char* argv[])
     screenPrinters.resize(SMT_LINES);
     pnpMachines.resize(SMT_LINES);
     aoiMachines.resize(SMT_LINES);
-    pnpQueues.resize(SMT_LINES);
     for (unsigned int i = 0; i < SMT_LINES; ++i)
     {
         screenPrinters[i] = new Machine;
         screenPrinters[i]->SetNameWithNum("Solder Paste Screen Printer", i);
         screenPrinters[i]->SetQueue(&smtQueue);
 
-        pnpQueues[i] = new Queue("Pick & Place Queue");
-        pnpMachines[i].resize(PNP_PER_LINE);
-        for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
-        {
-            pnpMachines[i][j] = new Machine;
-            pnpMachines[i][j]->SetNameWithNum("Pick & Place Machine", i * PNP_PER_LINE + j);
-            pnpMachines[i][j]->SetQueue(pnpQueues[i]);
-        }
+        pnpMachines[i] = new Machine;
+        pnpMachines[i]->SetNameWithNum("Pick & Place Machine", i);
 
         aoiMachines[i] = new Machine;
         aoiMachines[i]->SetNameWithNum("AOI Machine", i);
@@ -337,7 +293,7 @@ int main(int argc, char* argv[])
     {
         testingLines[i] = new Line;
         testingLines[i]->SetNameWithNum("Testing Line", i);
-        testingLines[i]->SetCapacity(50);
+        testingLines[i]->SetCapacity(15);
     }
 
     // Inicializacia Packing linky
@@ -346,20 +302,18 @@ int main(int argc, char* argv[])
     {
         packingLines[i] = new Line;
         packingLines[i]->SetNameWithNum("Packing Line", i);
-        packingLines[i]->SetCapacity(50);
+        packingLines[i]->SetCapacity(30);
     }
 
     RandomSeed(time(NULL));
-    Init(0, 86399); // 1 den
+    Init(0, 24 * HOURS - 1); // 1 den
     (new Generator)->Activate();
     Run();
 
     for (unsigned int i = 0; i < SMT_LINES; ++i)
     {
         screenPrinters[i]->Output();
-        for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
-            pnpMachines[i][j]->Output();
-        pnpQueues[i]->Output();
+        pnpMachines[i]->Output();
         aoiMachines[i]->Output();
     }
 
@@ -388,9 +342,7 @@ int main(int argc, char* argv[])
     for (unsigned int i = 0; i < SMT_LINES; ++i)
     {
         delete screenPrinters[i];
-        delete pnpQueues[i];
-        for (unsigned int j = 0; j < PNP_PER_LINE; ++j)
-            delete pnpMachines[i][j];
+        delete pnpMachines[i];
         delete aoiMachines[i];
     }
 
