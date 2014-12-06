@@ -24,7 +24,7 @@ std::vector<Machine*> screenPrinters;
 std::vector<Machine*> pnpMachines;
 std::vector<Machine*> aoiMachines;
 double minPnpTime = 1 * MINUTES;
-double maxPnpTime = 1.5 * MINUTES;
+double maxPnpTime = 2 * MINUTES;
 double aoiErrorRate = 1.0;
 
 // DIP
