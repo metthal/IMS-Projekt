@@ -211,15 +211,83 @@ rovnomerne 40 až 60 sekúnd.
 V modely sa nepredpokladá s možnou poruchou na zariadeniach z dôvodu nízkej
 poruchovosti.
 
-\subsection{Vytváranie konceptuálneho modelu}
-
+\subsection{Návrh konceptuálneho modelu}
+Požiadavok na výrobu základnej dosky vstupuje do systému kde sa zaraďuje do fronty
+SMT liniek. Postupuje cez solder paste screen printer, P\&P a AOI, ktoré 
+sú modelované ako zariadenia. Presúva sa na DIP linku, následne na testovaciu
+a baliacu linku ktoré sú modelované ako sklad. Následne proces predstavujúci
+hotovú základnú dosku opúšta systém.
 
 \subsection{Formy konceptuálneho modelu}
+Linky sú znazornené pomocou samotných petriho sietí, nakoľko prechody medzi linkami
+nebolo možné namodelovať a jednotlivých liniek može byť v systéme niekoľko.
+Jednotlivé petriho siete sa napájajú na prázdne miesto na konci každej
+siete. 
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=18cm]{smt.png}
+  \caption{SMT linka}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=10cm]{dip.png}
+  \caption{DIP linka}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=14cm]{tst.png}
+  \caption{Testovacia linka}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=10cm]{pkg.png}
+  \caption{Baliaca linka}
+\end{figure}
 
 % sekcia 4
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Architektúra simulačného modelu}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+V implementácií boli použité triedy knižnice SIMLIB/C++. Ako generátor požiadavkov
+na výrobu bola použitá trieda \texttt{Event}, tento generátor je aktivovaný počas simulácie
+v čase 0, následne je spušťaný každých 24 hodín. Generátor vytvára požiadavky typu
+\texttt{Board}, ktoré dedia triedu \texttt{Process}.
+
+Doba simulácie je nastavená na 1 deň. Časová jednotka použitá v simulácií je 
+sekunda.
+
+\subsection{Mapovanie abstraktného modelu do simulačného modelu}
+Všetky zariadenia na výrobných linkách sú odvodené od triedy \texttt{Machine}
+a všetky sklady od triedy \texttt{Line}. Obe tieto triedy umožnujú identifikovať
+na ktorých výrobných linkách sa nachádzajú. Generátor požiadavkov na výrobu základných
+dosiek je implementovaný v triede \texttt{Generator}. Trieda \texttt{Board} predstavuje
+základnú dosku od počiatku výrobného procesu až po jej zabalenie. 
+
+\subsection{Použitie programu}
+Simulácia sa kompiluje pomocou príkazu \texttt{\$ make}. Sputenie experimentov
+je prevádzané pomocou príkazu \texttt{\$ make run}. Parametre umožnujúce modifikovať
+simulačný model sú nasledovné.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Parameter}} & \multicolumn{1}{c|}{\textbf{Popis}}  \\ \hline
+\texttt{--smt N}    & Pri sumlácií bude použitých N SMT liniek.                          \\ \hline
+\texttt{--dip N}    & Pri sumlácií bude použitých N DIP liniek.                          \\ \hline
+\texttt{--tst N}    & Pri sumlácií bude použitých N testovacích liniek.                  \\ \hline
+\texttt{--pkg N}    & Pri sumlácií bude použitých N baliacich liniek.                    \\ \hline
+\texttt{--req N}    & Bude vygenerovaných N požiadavkov za deň.                          \\ \hline
+\texttt{--pnp N M}  & Trvanie výroby na P\&P stroji bude rovnomerne N až M sekúnd.       \\ \hline
+\texttt{--out FILE} & Výstup bude presmerovaný do súboru FILE.                           \\ \hline
+\texttt{--err N M}  & Chyba na AOI nastane v N\% prípadov, pri testovaní v M\% prípadov. \\ \hline
+\end{tabular}
+\end{table}
+
 
 % sekcia 5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
