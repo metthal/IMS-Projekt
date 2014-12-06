@@ -31,7 +31,7 @@
 % \vspace*{1cm}
 \begin{figure}[!h]
   \centering
-  \includegraphics[height=5cm]{doc/logo.eps}
+  \includegraphics[height=5cm]{logo.eps}
 \end{figure}
 \center Fakulta Informačních Technologií \\
 \center Vysoké Učení Technické v Brně \\
@@ -92,15 +92,17 @@ obslužních liniek.
 TODO: scim experimentujeme. 
 
 Cieľom experimentov je demonštrovanie možných optimalizácií na zadanom modely. Kon\-kré\-tne
-nájdenie optimálnejšej konfigurácie vzhľadom na počet vyrobených kusov základných 
-dosiek ročne pri čo najmenšej veľkosti a cene výslednej výrobnej linky.
+Konkrétne nájdenie optimálnejšej konfigurácie vzhľadom na počet vyrobených
+kusov základných dosiek ročne pri čo najmenšej veľkosti a cene výslednej 
+výrobnej linky.
 
 Pre spracovanie modelu je nutné naštudovať a pochopiť samotný proces výroby
 základnej dosky(ďalej len výroby). Vyhľadať a spracovať informácie týkajúce sa 
 technologií ktoré sú použité pri výrobe. Získať technické špecifikácie zariadení,
 ktoré sa podieľajú na výrobe. Pri\-spô\-so\-be\-nie modelovaného systému tak,
-aby čo najviac odpovedal reálnemu systému výroby. Následne spracovať tieto údaje,
-navrhnúť experimenty pré vytvorenie optimálnejších riešení výroby. 
+Prispôsobenie modelovaného systému tak, aby čo najviac odpovedal reálnemu
+systému výroby. Následne spracovať tieto údaje, navrhnúť experimenty pré 
+vytvorenie optimálnejších riešení výroby. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Autori a zdroje faktov}
@@ -166,6 +168,53 @@ skladov o identifikáciu v ktorej výrobnej linke sa nachádza.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Koncepcia modelu}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Podľa dostupných informáčních zdrojov sa predpokladá ročná výroba 7 miliónov
+základných dosiek na továreň, čo je približne 21 miliónov základných dosiek
+na spoločnosť. Z toho dôvodu je nutné vytvoriť požiadavku na 19179 kusov deňne.
+PCB sa radia do spoločnej fronty pred vstupom do SMT liniek. Zvolená je tá SMT
+linka na ktorej sa náchádza volné zariadenie pre sieťotlač spájkovacej hmoty.
+Predpokladáme rovnomerné trvanie sieťotlače 30 až 45 sekúnd pri nastavení sieťotlače
+na 10mm/sec a rozmeroch PCB 305x244 mm (ATX model).
+
+PCB sa ďalej radia do fronty P\&P zariadenia v SMT linke v ktorej sa nachádzajú.
+Predpoklad je, že P\&P zariadenie osadí čipy rýchlosťou 0.25 sekundy na čip, pričom
+sa predpokladajú hypotetické základné dosky obsahujúce 240 až 480 SMD komponent
+z dôvodu nedostatku informácií. Tento proces bude trvať rovnomerne 1 až 2 minuty.
+PCB sa pohybujú po výrobnej linke za sebou cez pec, tento prechod trvá 5 minút.
+
+Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd, v 
+prípade že nastane chyba s pravedepodobnosťou 1\% je doska opravovaná. Dĺžka
+opravy je daná exponencionálnym rozložením so stredom 6 minuty. Opravené PCB
+ktoré musia znova podstúpiť AOI majú vyššiu prioritu ako PCB vstupujúce do AOI 
+po prvý krát.
+
+Pri procese prechodu z SMT linky na DIP linku, je vybraná prvá DIP linka s dostupnou
+kapacitou, v prípade plného obsadenia DIP liniek je vybraná tá s najkratšou
+frontou. Neskôr dochádza k osadzovaniu DIP konetkorov na výrobnej linke
+ktorá predstavuje posuvný pás a následne musí základná doska prejsť ďalšou
+pecou. Nakoľko je tento proces vykonávaný na jednom posuvnom páse spojenie týchto
+procesov nijak neovplivní výsledky modelu. Celý tento proces trvá 2 minuty.
+
+Pri prechode z DIP liniek na testovacie linky je použitý rovnáky mechanizmus
+výberu linky ako pri prechode z SMT liniek na DIP linky. V testovacej fáze 
+dochádza k manuálnym a automatizovaným testom. Dĺžka testovania je daná 
+exponencionálnym rozložením so stredom 2 minuty, pričom v 1\% prípadov dochádza
+k potrebe dosku opraviť, dĺžka opravy je daná exponencionálnym rozložením so
+stredom 3 minuty. Opravené zákldné dosky musia podstúpiť testovanie znova, pričom
+majú vyššiu prioritu.
+
+Nasleduje prechod základných dosiek na baliace linky. Mechanizmus prechodu je
+rovnaký ako v prípade prechodu z DIP liniek na testovacie linky. Balenie trvá 
+rovnomerne 40 až 60 sekúnd.
+
+V modely sa nepredpokladá s možnou poruchou na zariadeniach z dôvodu nízkej
+poruchovosti.
+
+\subsection{Vytváranie konceptuálneho modelu}
+
+
+\subsection{Formy konceptuálneho modelu}
 
 % sekcia 4
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
