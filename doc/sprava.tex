@@ -16,17 +16,7 @@
 \usepackage[dvipdf]{graphicx}
 % velikost stranky
 \usepackage[top=3.5cm, left=2.5cm, text={17cm, 24cm}, ignorefoot]{geometry}
-
-\setcounter{secnumdepth}{4}
-\usepackage{pdflscape}
-\usepackage{afterpage}
-\usepackage{capt-of}% or use the larger `caption` package
-\usepackage{amsmath}
-\usepackage{rotating}
-\newcommand{\BigO}[1]{\ensuremath{O\bigl(#1\bigr)}}
-\newcommand{\ttlcb}{\texttt{\char 123}}
-\newcommand{\ttrcb}{\texttt{\char 125}}
-\newcommand{\ttsc}{\texttt{\char 59}}
+\usepackage{subfigure}
 
 \begin{document}
 
@@ -41,7 +31,7 @@
 % \vspace*{1cm}
 \begin{figure}[!h]
   \centering
-  \includegraphics[height=5cm]{logo.eps}
+  \includegraphics[height=5cm]{doc/logo.eps}
 \end{figure}
 \center Fakulta Informačních Technologií \\
 \center Vysoké Učení Technické v Brně \\
@@ -101,14 +91,14 @@ výrobného podniku v podmienkach rôzneho vyťaženia, pridávania jednotlivýc
 obslužních liniek.
 TODO: scim experimentujeme. 
 
-Cieľom experimentov je demonštrovanie možných optimalizácií na zadanom modely. Konkrétne
+Cieľom experimentov je demonštrovanie možných optimalizácií na zadanom modely. Kon\-kré\-tne
 nájdenie optimálnejšej konfigurácie vzhľadom na počet vyrobených kusov základných 
 dosiek ročne pri čo najmenšej veľkosti a cene výslednej výrobnej linky.
 
 Pre spracovanie modelu je nutné naštudovať a pochopiť samotný proces výroby
 základnej dosky(ďalej len výroby). Vyhľadať a spracovať informácie týkajúce sa 
 technologií ktoré sú použité pri výrobe. Získať technické špecifikácie zariadení,
-ktoré sa podieľajú na výrobe. Prispôsobenie modelovaného systému tak,
+ktoré sa podieľajú na výrobe. Pri\-spô\-so\-be\-nie modelovaného systému tak,
 aby čo najviac odpovedal reálnemu systému výroby. Následne spracovať tieto údaje,
 navrhnúť experimenty pré vytvorenie optimálnejších riešení výroby. 
 
