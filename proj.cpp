@@ -25,6 +25,7 @@ std::vector<Machine*> pnpMachines;
 std::vector<Machine*> aoiMachines;
 double minPnpTime = 1 * MINUTES;
 double maxPnpTime = 1.5 * MINUTES;
+double aoiErrorRate = 1.0;
 
 // DIP
 unsigned int DIP_LINES = 10;
@@ -35,6 +36,7 @@ unsigned int currentDipLine = 0;
 unsigned int TESTING_LINES = 9;
 std::vector<Line*> testingLines;
 unsigned int currentTestingLine = 0;
+double testingErrorRate = 1.0;
 
 // Packing
 unsigned int PACKING_LINES = 10;
@@ -45,7 +47,7 @@ unsigned int boardsRequested = 0;
 unsigned int boardsMade = 0;
 unsigned int boardsSMT = 0;
 
-Histogram doskaVoVyrobeD("Doska vo vyrobe - 30m/24h", 0, 30 * MINUTES, 24);
+Histogram doskaVoVyrobeD("Doska vo vyrobe - 2h/24h", 0, 2 * HOURS, 12);
 Histogram doskaVoVyrobeH("Doska vo vyrobe - 5m/1h", 0, 5 * MINUTES, 12);
 
 class Board : public Process
@@ -179,7 +181,7 @@ public:
         TRACE("Doska (%u) vstupila do AOI %d", _id, _linkId);
         Wait(Uniform(10, 14)); // AOI proces
 
-        if (Uniform(0, 100) < 1) // 1% pravdepodobnost chyby
+        if (Uniform(0, 100) < aoiErrorRate) // 1% pravdepodobnost chyby
         {
             TRACE("Doska (%u) nepresla AOI %d", _id, _linkId);
             passed = false;
@@ -202,7 +204,7 @@ public:
         TRACE("Doska (%u) zabrala Testing stroj %d", _id, _linkId);
         Wait(Exponential(2 * MINUTES)); // Testing proces
 
-        if (Uniform(0, 100) < 1) // 1% pravdepodobnost chyby
+        if (Uniform(0, 100) < testingErrorRate) // 1% pravdepodobnost chyby
         {
             TRACE("Doska (%u) nepresla cez Testing machine %d", _id, _linkId);
             passed = false;
@@ -279,6 +281,13 @@ int main(int argc, char* argv[])
         {
             SetOutput(argv[i + 1]);
             i += 1;
+            continue;
+        }
+        else if (strcmp(argv[i], "--err") == 0)
+        {
+            aoiErrorRate = std::atof(argv[i + 1]);
+            testingErrorRate = std::atof(argv[i + 2]);
+            i += 2;
             continue;
         }
     }
