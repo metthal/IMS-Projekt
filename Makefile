@@ -30,7 +30,7 @@ debug: $(OBJS)
 	$(CXX) $^ -o $(PROJECT) $(LDFLAGS)
 
 run: build
-	# Experiment 1 - Referencne hodnoty
+# Experiment 1 - Referencne hodnoty
 	./$(PROJECT) --out exp_ref.out
 
 clean:

@@ -30,23 +30,21 @@ double aoiErrorRate = 1.0;
 // DIP
 unsigned int DIP_LINES = 10;
 std::vector<Line*> dipLines;
-unsigned int currentDipLine = 0;
 
 // Testing
 unsigned int TESTING_LINES = 9;
 std::vector<Line*> testingLines;
-unsigned int currentTestingLine = 0;
 double testingErrorRate = 1.0;
 
 // Packing
 unsigned int PACKING_LINES = 10;
 std::vector<Line*> packingLines;
-unsigned int currentPackingLine = 0;
 
 unsigned int boardsRequested = 0;
 unsigned int boardsMade = 0;
 unsigned int boardsSMT = 0;
 
+Histogram vyrobaZaDen("Dosky vyrobene za den", 0, 2 * HOURS, 12);
 Histogram doskaVoVyrobeD("Doska vo vyrobe - 2h/24h", 0, 2 * HOURS, 12);
 Histogram doskaVoVyrobeH("Doska vo vyrobe - 5m/1h", 0, 5 * MINUTES, 12);
 
@@ -123,10 +121,24 @@ public:
         boardsSMT++;
 
         // DIP
-        // zvoli sa jedna DIP linka a dalsia doska pojde do dalsej DIP linky, a tak dokola
-        _linkId = currentDipLine++;
-        if (currentDipLine == DIP_LINES)
-            currentDipLine = 0;
+        // zvoli sa prva DIP linka, ktora nie je zaplnena
+        // pokial su vsetky zaplnene, voli sa ta, ktora ma najkratsiu frontu
+        unsigned int minQueueLen = 0;
+        for (i = 0; i < DIP_LINES; ++i)
+        {
+            if (dipLines[minQueueLen]->QueueLen() > dipLines[i]->QueueLen())
+                minQueueLen = i;
+
+            if (!dipLines[i]->Full())
+            {
+                _linkId = i;
+                break;
+            }
+        }
+
+        // vsetky su plne, zvol najmensiu frontu
+        if (i == DIP_LINES)
+            _linkId = minQueueLen;
 
         // vstup
         Enter(*dipLines[_linkId], 1);
@@ -152,9 +164,24 @@ public:
         }
 
         // Packing
-        _linkId = currentPackingLine++;
-        if (currentPackingLine == PACKING_LINES)
-            currentPackingLine = 0;
+        // zvoli sa prva Packing linka, ktora nie je zaplnena
+        // pokial su vsetky zaplnene, voli sa ta, ktora ma najkratsiu frontu
+        minQueueLen = 0;
+        for (i = 0; i < PACKING_LINES; ++i)
+        {
+            if (packingLines[minQueueLen]->QueueLen() > packingLines[i]->QueueLen())
+                minQueueLen = i;
+
+            if (!packingLines[i]->Full())
+            {
+                _linkId = i;
+                break;
+            }
+        }
+
+        // vsetky su plne, zvol najmensiu frontu
+        if (i == PACKING_LINES)
+            _linkId = minQueueLen;
 
         // vstup
         Enter(*packingLines[_linkId], 1);
@@ -169,6 +196,7 @@ public:
 
         boardsMade++;
 
+        vyrobaZaDen(Time);
         doskaVoVyrobeD(Time - zaciatokVyroby);
         doskaVoVyrobeH(Time - zaciatokVyroby);
     }
@@ -196,9 +224,25 @@ public:
     {
         bool passed = true;
 
-        _linkId = currentTestingLine++;
-        if (currentTestingLine == TESTING_LINES)
-            currentTestingLine = 0;
+        // zvoli sa prva Testing linka, ktora nie je zaplnena
+        // pokial su vsetky zaplnene, voli sa ta, ktora ma najkratsiu frontu
+        unsigned int minQueueLen = 0;
+        unsigned int i;
+        for (i = 0; i < TESTING_LINES; ++i)
+        {
+            if (testingLines[minQueueLen]->QueueLen() > testingLines[i]->QueueLen())
+                minQueueLen = i;
+
+            if (!testingLines[i]->Full())
+            {
+                _linkId = i;
+                break;
+            }
+        }
+
+        // vsetky su plne, zvol najmensiu frontu
+        if (i == TESTING_LINES)
+            _linkId = minQueueLen;
 
         Enter(*testingLines[_linkId], 1);
         TRACE("Doska (%u) zabrala Testing stroj %d", _id, _linkId);
@@ -333,7 +377,7 @@ int main(int argc, char* argv[])
     {
         packingLines[i] = new Line;
         packingLines[i]->SetNameWithNum("Packing Line", i);
-        packingLines[i]->SetCapacity(30);
+        packingLines[i]->SetCapacity(25);
     }
 
     Init(0, 24 * HOURS - 1); // 1 den
@@ -392,6 +436,7 @@ int main(int argc, char* argv[])
         delete packingLines[i];
     }
 
+    vyrobaZaDen.Output();
     doskaVoVyrobeD.Output();
     doskaVoVyrobeH.Output();
 }
