@@ -45,6 +45,9 @@ unsigned int boardsRequested = 0;
 unsigned int boardsMade = 0;
 unsigned int boardsSMT = 0;
 
+Histogram doskaVoVyrobeD("Doska vo vyrobe - 30m/24h", 0, 30 * MINUTES, 24);
+Histogram doskaVoVyrobeH("Doska vo vyrobe - 5m/1h", 0, 5 * MINUTES, 12);
+
 class Board : public Process
 {
 public:
@@ -85,6 +88,7 @@ public:
             }
         }
 
+        double zaciatokVyroby = Time;
         TRACE("Doska (%u) zabrala screen printer %d", _id, _linkId);
         Wait(Uniform(30, 45)); // samotny screen printing
 
@@ -162,6 +166,9 @@ public:
         Leave(*packingLines[_linkId], 1);
 
         boardsMade++;
+
+        doskaVoVyrobeD(Time - zaciatokVyroby);
+        doskaVoVyrobeH(Time - zaciatokVyroby);
     }
 
     bool AOI()
@@ -375,4 +382,7 @@ int main(int argc, char* argv[])
     {
         delete packingLines[i];
     }
+
+    doskaVoVyrobeD.Output();
+    doskaVoVyrobeH.Output();
 }
