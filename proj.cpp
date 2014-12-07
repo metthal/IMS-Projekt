@@ -14,6 +14,7 @@
 
 #define MINUTES         60.0
 #define HOURS           3600.0
+#define DAYS            86400.0
 
 unsigned int REQUEST_PER_DAY = 19179;
 
@@ -23,8 +24,8 @@ Queue smtQueue("SMT Fronta");
 std::vector<Machine*> screenPrinters;
 std::vector<Machine*> pnpMachines;
 std::vector<Machine*> aoiMachines;
-double minPnpTime = 1 * MINUTES;
-double maxPnpTime = 2 * MINUTES;
+double minPnpTime = 45;
+double maxPnpTime = 60;
 double aoiErrorRate = 1.0;
 
 // DIP
@@ -40,9 +41,7 @@ double testingErrorRate = 1.0;
 unsigned int PACKING_LINES = 10;
 std::vector<Line*> packingLines;
 
-unsigned int boardsRequested = 0;
 unsigned int boardsMade = 0;
-unsigned int boardsSMT = 0;
 
 Histogram vyrobaZaDen("Dosky vyrobene za den", 0, 2 * HOURS, 12);
 Histogram doskaVoVyrobeD("Doska vo vyrobe - 2h/24h", 0, 2 * HOURS, 12);
@@ -55,7 +54,6 @@ public:
 
     void Behavior()
     {
-        boardsRequested++;
         TRACE("Nova doska (%u)", _id);
         // SMT
         // Najdi volny screen printer
@@ -117,8 +115,6 @@ public:
             while (AOI() == false); // pokial doska obsahuje chyby, opravujeme ju
             Priority = 0;   // po prejdeni AOI zniz prioritu
         }
-
-        boardsSMT++;
 
         // DIP
         // zvoli sa prva DIP linka, ktora nie je zaplnena
@@ -380,7 +376,7 @@ int main(int argc, char* argv[])
         packingLines[i]->SetCapacity(25);
     }
 
-    Init(0, 24 * HOURS - 1); // 1 den
+    Init(0, 365 * DAYS - 1); // 1 rok
     RandomSeed(time(NULL));
     (new Generator)->Activate();
     Run();
@@ -409,10 +405,6 @@ int main(int argc, char* argv[])
 
     smtQueue.Output();
 
-    Print("Boards Requested: %u\n", boardsRequested);
-    Print("Boards SMT: %u\n", boardsSMT);
-    Print("Boards Made: %u\n", boardsMade);
-
     // Upraceme si pamat
     for (unsigned int i = 0; i < SMT_LINES; ++i)
     {
@@ -439,4 +431,6 @@ int main(int argc, char* argv[])
     vyrobaZaDen.Output();
     doskaVoVyrobeD.Output();
     doskaVoVyrobeH.Output();
+
+    Print("Vyrobenych zakladnych dosiek: %u\n", boardsMade);
 }
