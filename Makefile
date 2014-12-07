@@ -30,8 +30,11 @@ debug: $(OBJS)
 	$(CXX) $^ -o $(PROJECT) $(LDFLAGS)
 
 run: build
-# Experiment 1 - Referencne hodnoty
+	@echo ""
+	@echo "Experiment 1 - Referencne hodnoty"
 	./$(PROJECT) --out exp_ref.out
+	@echo ""
+	@echo "Experiment 2 - Zrychlenie P&P zariadeni"
 
 clean:
 	$(RM) $(OBJS) $(PROJECT) sprava.*
