@@ -16,7 +16,9 @@
 \usepackage[dvipdf]{graphicx}
 % velikost stranky
 \usepackage[top=3.5cm, left=2.5cm, text={17cm, 24cm}, ignorefoot]{geometry}
-\usepackage{subfigure}
+\usepackage{caption}
+\usepackage{subcaption}
+
 
 \begin{document}
 
@@ -31,7 +33,7 @@
 % \vspace*{1cm}
 \begin{figure}[!h]
   \centering
-  \includegraphics[height=5cm]{logo.eps}
+  \includegraphics[height=5cm]{doc/logo.eps}
 \end{figure}
 \center Fakulta Informačních Technologií \\
 \center Vysoké Učení Technické v Brně \\
@@ -226,25 +228,25 @@ siete.
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=18cm]{smt.png}
+  \includegraphics[width=17cm]{doc/smt.png}
   \caption{SMT linka}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=10cm]{dip.png}
+  \includegraphics[width=10cm]{doc/dip.png}
   \caption{DIP linka}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=14cm]{tst.png}
+  \includegraphics[width=14cm]{doc/tst.png}
   \caption{Testovacia linka}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=10cm]{pkg.png}
+  \includegraphics[width=10cm]{doc/pkg.png}
   \caption{Baliaca linka}
 \end{figure}
 
@@ -293,6 +295,96 @@ simulačný model sú nasledovné.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simulačné experimenty a ich priebeh}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Cieľom experimentov s reprezentáciou simulačného modelu bolo zistiť, vyťaženie
+liniek počas výrobného procesu v rámci jedného dňa a schopnosť produkcie 7 miliónov
+dosiek za rok.
+
+Vytvorenie simulačného modelu bolo nutné, nakoľko hypotetický model je príliš
+zložitý na popis a riešenie pomocou analitických rovníc.
+
+\subsection{Postup experimentovania}
+Z dôvodu podania čo najlepšie pozorovateľných výsledkov experimentov, bol 
+generátor pseudonáhodných čísel inicilizovaný hodnotou(\textit{angl. seed})
+aktuálného času. Priebeh experimentov prebiehal tak, že boli modifikované 
+vlastnosti jednotlivých prvkov sýstému alebo boli pridávané/odoberané výrobné
+linky.
+
+\subsection{Popis experimentov}
+Prvý experiment vykonávame so základnou konfigurácou simulačného modelu, z toho 
+dôvodu sa nazýva referenčny experiment. 
+
+Všetky ďalsie experimenty budú výchádzať z referenčného. Z výsledkov referenčného
+experimentu budu vyvodené závery, na základe ktorých budu vykonávané ostané experimenty.
+Dôraz bude kladený na zmenu parametrov, ktoré sú nachýlené k zmenám vlastností
+systému.
+
+\subsubsection{Referenčný experiment}
+Východiskovým experiment pre porovnávanie s ďalšími experimentami.
+Experiment bol spustený so základnými parametrami. Na základe nižšie uvedených histogramoch
+je možné vidiet počet vyrobených dosiek v priebehu dňa, dobu 
+výroby základnej dosky[cislo obrazka]. Ďalej je možné vidiet priemernú dĺžku
+fronty u P\&P zariadení[cislo]. Zvyšné histogramy zobrazujú priemernú a maximálnu
+kapacitu na linkách: SMT [cislo], DIP [cislo], testovacích [číslo] a baliacich [číslo].
+
+\begin{verbatim}
+  Vyrobených základných dosiek: 7 000 335 kusov
+\end{verbatim}
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/1_hist1.eps}
+  \caption{počet dosiek vyrobených za deň}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/1_hist2.eps}
+    \caption{doba výroby základnej dosky}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/1_hist3.eps}
+  \caption{priemerná dĺžka fronty u P\&P}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/1_hist4.eps}
+    \caption{priemerná a maximalna kap. na DIP}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/1_hist5.eps}
+  \caption{priemerná a maximalna kap. na testovacej linke}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/1_hist6.eps}
+    \caption{priemerná a maximalna kap. na baliacej linke}
+  \end{minipage}
+\end{figure}
+
+Z prvého histogramu je vidieť že výrobný podnik pracuje v čase od 00:00 do 16:00 hod.
+V čase 16:00 až 24:00 výrobná linka čaká na prijatie novej požiadavky, čím nieje 
+využitá celá jeho schopnosť produkovať základné dosky. Podľa druhého histogramu,
+je vidieť že niektoré dosky sú v výrobnom procese 4 až 6 hod, čo znamená že výrobný
+proces je v niektorej jeho časti výrazne spomalovaný. K spomalovaniu dochádza 
+vo fronte u zariadenia P\&P[link hist.], ktoré je najpomalšie z celej SMT linky.
+Zo zvýšních histogramov je vidieť že spomalenie následne spôsobuje že DIP, baliacie aj
+testovacie linky sú využité len z časti.
+
+\subsubsection{Zrýchlenie P\&P zariadení}
 
 % sekcia 6
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
