@@ -140,7 +140,7 @@ trvanie približne 5 minút v závisloti na použitom materiále.
 Proces pokračuje kontrolou nanometrových chýb spojov na PCB. Tento proces je 
 nazývaný AOI (\textit{angl. automated optical insepction}). V prípade výskytu
 chýb je PCB nutné manuálne opraviť. Po oprave je nutné AOI zopakovať. Tento
-úkon nieje časovo náročny [link].
+úkon nieje časovo náročny.
 
 Následne je PCB umiestnená na DIP (\textit{angl. Dual in-line package})
 linku ktorú predstavuje posuvný pás na ktorom sú manuálne umiesňované 
@@ -185,7 +185,7 @@ sa predpokladajú hypotetické základné dosky obsahujúce 240 až 480 SMD komp
 z dôvodu nedostatku informácií. Tento proces bude trvať rovnomerne 36 až 72 sekúnd.
 PCB sa pohybujú po výrobnej linke za sebou cez pec, tento prechod trvá 5 minút.
 
-Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd, v 
+Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd[LINK], v 
 prípade že nastane chyba s pravedepodobnosťou 1\% je doska opravovaná. Dĺžka
 opravy je daná exponencionálnym rozložením so stredom 6 minuty. Opravené PCB
 ktoré musia znova podstúpiť AOI majú vyššiu prioritu ako PCB vstupujúce do AOI 
@@ -360,18 +360,20 @@ kapacitu na linkách: SMT [cislo], DIP [cislo], testovacích [číslo] a baliaci
   \end{minipage}
 \end{figure}
 
+\newpage
+
 \begin{figure}[ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
   \includegraphics[width=8cm]{doc/1_hist5.eps}
-  \caption{priemerná a maximalna kap. na testovacej linke}
+  \caption{priemerná a maximalna kap. na TST}
   \end{minipage}
   \quad
   \begin{minipage}{0.45\linewidth}
     \centering
     \includegraphics[width=8cm]{doc/1_hist6.eps}
-    \caption{priemerná a maximalna kap. na baliacej linke}
+    \caption{priemerná a maximalna kap. na PKG}
   \end{minipage}
 \end{figure}
 
@@ -384,12 +386,155 @@ vo fronte u zariadenia P\&P[link hist.], ktoré je najpomalšie z celej SMT link
 Zo zvýšních histogramov je vidieť že spomalenie následne spôsobuje že DIP, baliacie aj
 testovacie linky sú využité len z časti.
 
+\newpage
+
 \subsubsection{Zrýchlenie P\&P zariadení}
+Pri druhom experimente bol kladený dôraz na zrýchlenie P\&P zariadenia 
+pričom obsluha dosky trvala rovnomerne 25 až 40 sekúnd, čo 
+znížilo veľkosť P\&P front v systéme. V tomto prípade prišlo k veľmi
+výraznému zníženiu obsluhy oproti referenčnému experimentu. V nižšie uvedených 
+histogramoch možne vidieť lepšie využitie kapacity pri DIP, testovacích a baliacích
+linkách, avšak stále niesú využité naplno. 
+
+\begin{verbatim}
+  Vyrobených základných dosiek: 7 000 335 kusov
+\end{verbatim}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/2_hist1.eps}
+  \caption{počet dosiek vyrobených za deň}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/2_hist2.eps}
+    \caption{doba výroby základnej dosky za min.}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/2_hist3.eps}
+  \caption{priemerná dĺžka fronty u P\&P}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/2_hist4.eps}
+    \caption{priemerná a maximalna kap. na DIP}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/2_hist5.eps}
+  \caption{priemerná a maximalna kap. na TST}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/2_hist6.eps}
+    \caption{priemerná a maximalna kap. na PKG}
+  \end{minipage}
+\end{figure}
+
+\newpage
+
+\subsubsection{Zvýšená produkcia}
+
+\begin{verbatim}
+  Vyrobených základných dosiek: 12 775 00 kusov
+\end{verbatim}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/3_hist1.eps}
+  \caption{počet dosiek vyrobených za deň}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/3_hist2.eps}
+    \caption{doba výroby základnej dosky za min.}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/3_hist3.eps}
+  \caption{priemerná dĺžka fronty u P\&P}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/3_hist4.eps}
+    \caption{priemerná a maximalna kap. na DIP}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/3_hist5.eps}
+  \caption{priemerná a maximalna kap. na TST}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/3_hist6.eps}
+    \caption{priemerná a maximalna kap. na PKG}
+  \end{minipage}
+\end{figure}
+
+\newpage
 
 % sekcia 6
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Zhrnutie simulačných experimentov a záver}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{thebibliography}{9}
+
+\bibitem{peringer-slidy} 
+PERINGER, P.: Modelování a simulace, september 2014, (VUT FIT v Brne), IMS - slajdy z
+prednášok.
+
+\bibitem{screen-printer-DEK} 
+DEK Printing Machines Limited. [online], 2000.
+\\\texttt{URL <http://www.pcbtechnology.pl/wp-content/uploads/2014/02/dek-infinity-spec.pdf>}
+
+\bibitem{smt-PNP} 
+FUJI MACHINE MFG. CO., LTD. [online], 2013.
+\\\texttt{URL <https://smt.fuji.co.jp/e/products/mounter/detail.php?id=8>}
+
+\bibitem{reflow-oven} 
+IXYS Corporation. [online], 2006.
+\\\texttt{URL <http://www.ixys.com/Documents/AppNotes/IXAN0059.pdf>}
+
+\bibitem{AOI} 
+Nordson YESTECH. [online].
+\\\texttt{URL <http://www.nordson.com/en-us/divisions/yestech/Literature/NYT-FXSeries\_DS\%28L\%29.pdf>}
+
+\bibitem{gigabyte-sprava} 
+GIGA-BYTE Technology Co., Ltd. [online], 2013.
+\\\texttt{URL <http://www.gigabyte.com/fileupload/sitemap/36/images/AnnualReportEng-2013.pdf>}
+
+\bibitem{asus-sprava} 
+ASUSTeK Computer Inc. [online], 2013.
+\\\texttt{URL <http://www.annualreportowl.com/Asus/2013/Annual\%20Report>}
+
+\end{thebibliography}
 
 \end{document}
