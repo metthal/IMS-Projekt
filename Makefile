@@ -35,6 +35,7 @@ run: build
 	./$(PROJECT) --out exp_ref.out
 	@echo ""
 	@echo "Experiment 2 - Zrychlenie P&P zariadeni"
+	./$(PROJECT) --out exp_pnp.out --pnp 25 40
 
 clean:
 	$(RM) $(OBJS) $(PROJECT) sprava.*
