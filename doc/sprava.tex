@@ -178,9 +178,9 @@ Predpokladáme rovnomerné trvanie sieťotlače 30 až 45 sekúnd pri nastavení
 na 10mm/sec a rozmeroch PCB 305x244 mm (ATX model).
 
 PCB sa ďalej radia do fronty P\&P zariadenia v SMT linke v ktorej sa nachádzajú.
-Predpoklad je, že P\&P zariadenie osadí čipy rýchlosťou 0.25 sekundy na čip, pričom
+Predpoklad je, že P\&P zariadenie osadí čipy rýchlosťou 0.15 sekundy na čip, pričom
 sa predpokladajú hypotetické základné dosky obsahujúce 240 až 480 SMD komponent
-z dôvodu nedostatku informácií. Tento proces bude trvať rovnomerne 1 až 2 minuty.
+z dôvodu nedostatku informácií. Tento proces bude trvať rovnomerne 36 až 72 sekúnd.
 PCB sa pohybujú po výrobnej linke za sebou cez pec, tento prechod trvá 5 minút.
 
 Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd, v 
@@ -257,7 +257,7 @@ na výrobu bola použitá trieda \texttt{Event}, tento generátor je aktivovaný
 v čase 0, následne je spušťaný každých 24 hodín. Generátor vytvára požiadavky typu
 \texttt{Board}, ktoré dedia triedu \texttt{Process}.
 
-Doba simulácie je nastavená na 1 deň. Časová jednotka použitá v simulácií je 
+Doba simulácie je nastavená na 1 rok. Časová jednotka použitá v simulácií je 
 sekunda.
 
 \subsection{Mapovanie abstraktného modelu do simulačného modelu}
