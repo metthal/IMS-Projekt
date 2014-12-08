@@ -32,13 +32,16 @@ debug: $(OBJS)
 run: build
 	@echo ""
 	@echo "Experiment 1 - Referencne hodnoty"
-#./$(PROJECT) --out exp_ref.out
+	./$(PROJECT) --out exp_ref.out
 	@echo ""
 	@echo "Experiment 2 - Zrychlenie P&P zariadeni"
-#./$(PROJECT) --out exp_pnp.out --pnp 25 40
+	./$(PROJECT) --out exp_pnp.out --pnp 25 40
 	@echo ""
 	@echo "Experiment 3 - Zvysena produkcia"
 	./$(PROJECT) --out exp_pro.out --req 35000 --smt 25 --dip 3 --tst 6 --pkg 3
+	@echo ""
+	@echo "Experiment 4 - Zvysena chybovost"
+	./$(PROJECT) --out exp_err.out --err 15 15
 
 clean:
 	$(RM) $(OBJS) $(PROJECT) sprava.*
