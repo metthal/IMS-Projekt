@@ -1,6 +1,7 @@
 PROJECT = ims-sim
 
 SRCS = $(wildcard *.cpp)
+HDRS = $(wildcard *.h)
 OBJS = $(patsubst %.cpp, %.o, $(SRCS))
 
 CXX = g++
@@ -13,7 +14,7 @@ RM = rm -rf
 
 TAR_FILE = 04_xmilko01_xvrabe07.tar.gz
 TAR = tar -czf $(TAR_FILE)
-PACKED_FILES = $(SRCS) Makefile sprava.pdf
+PACKED_FILES = $(SRCS) $(HDRS) Makefile sprava.pdf
 
 TEX = pdflatex -interaction nonstopmode
 TEX_FILE = doc/sprava.tex
