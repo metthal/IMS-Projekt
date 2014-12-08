@@ -90,9 +90,9 @@ vytvorenie simulačného modelu(\cite{peringer-slidy} str.46) systému(\cite{per
 
 Na základe modelu a simulačných experimentov(\cite{peringer-slidy} str.168)
 (ďalej len experimenty) bude ukázané chovanie systému (\cite{peringer-slidy} str.24)
-výrobného podniku v podmienkach rôzneho vyťaženia(\cite{peringer-slidy} str.139),
-pridávania jednotlivých obslužních liniek.
-TODO: scim experimentujeme. 
+výrobného podniku v podmienkach rôzneho vyťaženia(\cite{peringer-slidy} str.139) a
+modifikovaných vlastností jednotlivých obslužních liniek.
+ 
 
 Cieľom experimentov je demonštrovanie možných optimalizácií na zadanom modely. Kon\-kré\-tne
 nájdenie optimálnejšej konfigurácie vzhľadom na počet vyrobených
@@ -171,7 +171,6 @@ skladov o identifikáciu v ktorej výrobnej linke sa nachádza.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Koncepcia modelu}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 Podľa dostupných informáčních zdrojov sa predpokladá ročná výroba 7 miliónov
 základných dosiek na továreň, čo je približne 21 miliónov základných dosiek
 na spoločnosť\cite{gigabyte-sprava}. Z toho dôvodu je nutné vytvoriť požiadavku na 19179 kusov deňne.
@@ -211,6 +210,16 @@ Nasleduje prechod základných dosiek na baliace linky. Mechanizmus prechodu je
 rovnaký ako v prípade prechodu z DIP liniek na testovacie linky. Balenie trvá 
 rovnomerne 40 až 60 sekúnd.
 
+Počty a kapacity liniek v modely bol zvolený hypoteticky na základe dostupných informácií
+o jednotlivých procesoch a ich časovej náročnosti. Počty jednotlivých liniek sú
+nasledovné:
+\begin{itemize}
+ \item SMT linky - 18
+ \item DIP linky - 10 s kapacitou 50
+ \item Testovacie linky - 9 s kapacitou 15
+ \item Baliace linky - 10 s kapacitou 25
+\end{itemize}
+
 V modely sa nepredpokladá s možnou poruchou na zariadeniach z dôvodu nízkej
 poruchovosti.
 
@@ -227,25 +236,25 @@ nakoľko prechody medzi linkami nebolo možné namodelovať a jednotlivých lini
 može byť v systéme niekoľko. Jednotlivé petriho siete sa napájajú na prázdne
 miesto na konci každej siete. 
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=17cm]{doc/smt.png}
   \caption{SMT linka}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=10cm]{doc/dip.png}
   \caption{DIP linka}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=14cm]{doc/tst.png}
   \caption{Testovacia linka}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=10cm]{doc/pkg.png}
   \caption{Baliaca linka}
@@ -331,7 +340,7 @@ kapacitu na linkách: SMT (Obr. 7), DIP (Obr. 8), testovacích (Obr. 9) a baliac
   Vyrobených základných dosiek: 7 000 335 kusov
 \end{verbatim}
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
@@ -346,7 +355,7 @@ kapacitu na linkách: SMT (Obr. 7), DIP (Obr. 8), testovacích (Obr. 9) a baliac
   \end{minipage}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
@@ -368,40 +377,38 @@ kapacitu na linkách: SMT (Obr. 7), DIP (Obr. 8), testovacích (Obr. 9) a baliac
   \begin{minipage}{0.45\linewidth}
   \centering
   \includegraphics[width=8cm]{doc/1_hist5.eps}
-  \caption{priemerná a maximalna kap. na TST}
+  \caption{priemerná a maximalna kap. na testovacej linkách}
   \end{minipage}
   \quad
   \begin{minipage}{0.45\linewidth}
     \centering
     \includegraphics[width=8cm]{doc/1_hist6.eps}
-    \caption{priemerná a maximalna kap. na PKG}
+    \caption{priemerná a maximalna kap. na baliacich linkách}
   \end{minipage}
 \end{figure}
 
-Z prvého histogramu je vidieť že výrobný podnik pracuje v čase od 00:00 do 16:00 hod.
+Z prvého histogramu(Obr. 5) je vidieť že výrobný podnik pracuje v čase od 00:00 do 16:00 hod.
 V čase 16:00 až 24:00 výrobná linka čaká na prijatie novej požiadavky, čím nieje 
-využitá celá jeho schopnosť produkovať základné dosky. Podľa druhého histogramu,
+využitá celá jeho schopnosť produkovať základné dosky. Podľa druhého(Obr. 6) histogramu,
 je vidieť že niektoré dosky sú v výrobnom procese 4 až 6 hod, čo znamená že výrobný
 proces je v niektorej jeho časti výrazne spomalovaný. K spomalovaniu dochádza 
-vo fronte u zariadenia P\&P[link hist.], ktoré je najpomalšie z celej SMT linky.
-Zo zvýšních histogramov je vidieť že spomalenie následne spôsobuje že DIP, baliacie aj
+vo fronte u zariadenia P\&P(Obr. 7), ktoré je najpomalšie z celej SMT linky.
+Zo zvýšních(Obr. 8, 9, 10) histogramov je vidieť že spomalenie následne spôsobuje že DIP, baliacie aj
 testovacie linky sú využité len z časti.
 
 \newpage
 
 \subsubsection{Zrýchlenie P\&P zariadení}
-Pri druhom experimente bol kladený dôraz na zrýchlenie P\&P zariadenia 
-pričom obsluha dosky trvala rovnomerne 25 až 40 sekúnd, čo 
-znížilo veľkosť P\&P front v systéme. V tomto prípade prišlo k veľmi
-výraznému zníženiu obsluhy oproti referenčnému experimentu. V nižšie uvedených 
-histogramoch možne vidieť lepšie využitie kapacity pri DIP, testovacích a baliacích
-linkách, avšak stále niesú využité naplno. 
+Pri druhom experimente bude nastavený čas obsluhy P\&P zariadeniach 
+rovnomerne 25 až 40 sekúnd, očakáva sa zníženie veľkosti P\&P front v systéme
+a zníženie trvania výrobného procesu pre jednu základnú dosku.
+V nižšie uvedených histogramoch je možné vidieť výsledky experimentu 
 
 \begin{verbatim}
   Vyrobených základných dosiek: 7 000 335 kusov
 \end{verbatim}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
@@ -416,7 +423,7 @@ linkách, avšak stále niesú využité naplno.
   \end{minipage}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
@@ -431,30 +438,45 @@ linkách, avšak stále niesú využité naplno.
   \end{minipage}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
   \includegraphics[width=8cm]{doc/2_hist5.eps}
-  \caption{priemerná a maximalna kap. na TST}
+  \caption{priemerná a maximalna kap. na testovacích linkách}
   \end{minipage}
   \quad
   \begin{minipage}{0.45\linewidth}
     \centering
     \includegraphics[width=8cm]{doc/2_hist6.eps}
-    \caption{priemerná a maximalna kap. na PKG}
+    \caption{priemerná a maximalna kap. na baliacih linkách}
   \end{minipage}
 \end{figure}
 
 \newpage
 
+Experiment ukázal, že očakávania boli správne, priemerná dĺžka front
+u P\&P zariádení sa zmenšila približne o 1 000 násobne(Obr. 13). Celková doba
+výroby jednej základnej dosky sa zmenila tak, že vačsina základných
+dosiek bola vyrobených za 5 až 10 minút(Obr. 12), čo predstavuje približne 
+20 násobné zrýchlenie. Naviac sa zvýšilo vyťaženie DIP, testovacích
+a baliacich liniek(Obr. 14, 15, 16).
+
+\newpage
+
 \subsubsection{Zvýšená produkcia}
+V tomto experimente sa požaduje zvýšená produkcia základných dosiek
+o približne 50\% pričom sa očakáva ročná produkcia 12 775 000 kusov.
+Kvôli veľkej zátaži na SMT linkách sa preto ich počet navýši na 25.
+Nakoľko DIP, testovacie a baliace linky niesú plne využívané z toho
+dôvodu sa počet DIP a baliacich liniek zredukuje na 3 a testovacích
+na 6. 
 
 \begin{verbatim}
-  Vyrobených základných dosiek: 12 775 00 kusov
+  Vyrobených základných dosiek: 12 775 000 kusov
 \end{verbatim}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
@@ -469,7 +491,7 @@ linkách, avšak stále niesú využité naplno.
   \end{minipage}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
@@ -484,73 +506,167 @@ linkách, avšak stále niesú využité naplno.
   \end{minipage}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.45\linewidth}
   \centering
   \includegraphics[width=8cm]{doc/3_hist5.eps}
-  \caption{priemerná a maximalna kap. na TST}
+  \caption{priemerná a maximalna kap. na testovacích linkách}
   \end{minipage}
   \quad
   \begin{minipage}{0.45\linewidth}
     \centering
     \includegraphics[width=8cm]{doc/3_hist6.eps}
-    \caption{priemerná a maximalna kap. na PKG}
+    \caption{priemerná a maximalna kap. na baliacich linkách}
   \end{minipage}
 \end{figure}
 
 \newpage
 
+Ročná produkcia 12 775 000 kusov bola dosiahnutá.
+Výrobný podnik fungoval v takmer nepretržitej prevádzke,
+avšak pomalá obsluha na P\&P zariadeniach spôsobila
+že výrobný proces vačšiny základných dosiek trval vyše
+2 hodiny(Obr. 18). Ukázalo sa že napriek vysokému počtu SMT liniek 
+neboli využívané ani 3 DIP linky(Obr. 20), DIP linka č.1 bola využívaná 
+po celý čas, DIP linka č.2 bola využívaná približne štvrtinu času
+výrobného procesu. DIP linka č.3 nebola využívaná vôbec.
+Testovacie linky č.1 až č.4 majoritne využívané, linky č.5 a č.6
+boli využívané minimum času(Obr. 21). Baliace linka č.1 bola využívaná 
+najviac, linka č.2 bola využívaná minimálne a linka č.3 nebola 
+využítá vôbec.
+
+\newpage
+
+\subsubsection{Zvýšená chybovosť}
+Na zariadeniach AOI a tiež na zariadeniach nachádzajúcich
+sa na testovacej linke môže prísť pri k detekcií chyby
+pri výrobe dosky. Pravdepodobnosť že sa táto chyba vyskytne 
+bude nastavená v tomto experimente na 30\%. V prípade výskytu chyby,
+je na doske zahájený proces opravy, pričom zariadenie ktoré, chybu
+detekovalo je uvolené pre obsluhu daľších dosiek. Z tohto
+dôvodu sa neočakáva žiadny, prípadne minimálny vpliv na dĺžku
+trvania výrobného procesu.
+
+\begin{verbatim}
+  Vyrobených základných dosiek: 7 000 335 kusov
+\end{verbatim}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/4_hist1.eps}
+  \caption{počet dosiek vyrobených za deň}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/4_hist2.eps}
+    \caption{doba výroby základnej dosky za min.}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/4_hist3.eps}
+  \caption{priemerná dĺžka fronty u P\&P}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/4_hist4.eps}
+    \caption{priemerná a maximalna kap. na DIP}
+  \end{minipage}
+\end{figure}
+
+\newpage
+
+\begin{figure}[!ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/4_hist5.eps}
+  \caption{priemerná a maximalna kap. na testovacích linkách}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/4_hist6.eps}
+    \caption{priemerná a maximalna kap. na baliacih linkách}
+  \end{minipage}
+\end{figure}
+
+Zvýšená chybovosť nijak neovplivnila výrobný proces. Čím sa predpoklad potrvdil.
+
 % sekcia 6
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Zhrnutie simulačných experimentov a záver}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Simulačný model podstúpil rôznym experimentom, čím boli získané hlbšie znalosti
+o tomto systéme. Bolo zistené, že časť systému ktorá ho najviac spomaluje sú práve P\%P 
+zariadenia s pomalou dobou obsluhy. Bolo dokázané že systém obsahuje nadbytočné
+DIP, testovacie a baliace linky. Chybovosť pri výrobe sa preukázala ako minimálny
+faktor ovplivňujúci systém.
 
+Záverom je, že hypotetický model výrobného podniku, navrhnutého v kapitole 3. nieje
+najoptimálnejší. Z výsledkou experimentov sa ukázalo že optimálny model by mal
+jednoznačnš obsahovať viac SMT liniek a práve naopak menej DIP, testovacích a 
+baliacich liniek. Ideálnou voľbou by bolo pridať na každú SMT linku viac P\&P zariadení
+alebo zrýchliť obsluhu týchto zariadení.
+
+
+\newpage
+
+\addcontentsline{toc}{section}{Literatúra}
 \begin{thebibliography}{9}
 
 \bibitem{peringer-slidy} 
-PERINGER, P.: Modelování a simulace, september 2014, (VUT FIT v Brne), IMS - slajdy z
+PERINGER, P.: Modelování a simulace. [online], september 2014. (VUT FIT v Brne), IMS - slajdy z
 prednášok.
+\\\url{https://www.fit.vutbr.cz/study/courses/IMS/public/prednasky/IMS.pdf}
 
 \bibitem{screen-printer-DEK} 
-DEK Printing Machines Limited. [online], 2000.
-\\\texttt{URL <http://www.pcbtechnology.pl/wp-content/uploads/2014/02/dek-infinity-spec.pdf>}
+DEK Printing Machines Limited.:DEK INFINITY Engineering Specification. [online], 2000.
+\\\url{http://www.pcbtechnology.pl/wp-content/uploads/2014/02/dek-infinity-spec.pdf}
 
 \bibitem{smt-PNP} 
-FUJI MACHINE MFG. CO., LTD. [online], 2013.
-\\\texttt{URL <https://smt.fuji.co.jp/e/products/mounter/detail.php?id=8>}
+FUJI MACHINE MFG. CO., LTD.:SMT Equipment Mounters. [online], 2013.
+\\\url{https://smt.fuji.co.jp/e/products/mounter/detail.php?id=8}
 
 \bibitem{reflow-oven} 
-IXYS Corporation. [online], 2006.
-\\\texttt{URL <http://www.ixys.com/Documents/AppNotes/IXAN0059.pdf>}
+IXYS Corporation.:Lead Free Solder Reflow for Semiconductor Power Devices. [online], 2006.
+\\\url{http://www.ixys.com/Documents/AppNotes/IXAN0059.pdf}
 
 \bibitem{AOI} 
-Nordson YESTECH. [online].
-\\\texttt{URL <http://www.nordson.com/en-us/divisions/yestech/Literature/NYT-FXSeries\_DS\%28L\%29.pdf>}
+Nordson YESTECH.:FX Series AOI. [online].
+\\\url{http://www.nordson.com/en-us/divisions/yestech/Literature/NYT-FXSeries\_DS\%28L\%29.pdf}
 
 \bibitem{gigabyte-sprava} 
-GIGA-BYTE Technology Co., Ltd. [online], 2013.
-\\\texttt{URL <http://www.gigabyte.com/fileupload/sitemap/36/images/AnnualReportEng-2013.pdf>}
+GIGA-BYTE Technology Co., Ltd.:Annual Report. [online], 2013.
+\\\url{http://www.gigabyte.com/fileupload/sitemap/36/images/AnnualReportEng-2013.pdf}
 
 \bibitem{asus-sprava} 
-ASUSTeK Computer Inc. [online], 2013.
-\\\texttt{URL <http://www.annualreportowl.com/Asus/2013/Annual\%20Report>}
+ASUSTeK Computer Inc.:Annual Report. [online], 2013.
+\\\url{http://www.annualreportowl.com/Asus/2013/Annual\%20Report}
 
 \bibitem{gnuplot} 
 WILLIAMS, T.; KELLEY, C.; LANG, R.: Gnuplot. [online], Naposledy upravené november 2014.
-\\\texttt{URL <http://www.gnuplot.info>}
+\\\url{http://www.gnuplot.info}
 
 \bibitem{SMT} 
 WILLIAMS, P.: SURFACE MOUNT COUNCIL. [online], august 1999.
-\\\texttt{URL <http://www.ipc.org/4.0_Knowledge/4.1_Standards/smcstatus.pdf>}
+\\\url{http://www.ipc.org/4.0\_Knowledge/4.1\_Standards/smcstatus.pdf}
 
 \bibitem{SIMLIB} 
 PERINGER, P.: SIMLIB/C++. [online], Naposledy upravené 27. 03. 2014.
-\\\texttt{URL <http://www.fit.vutbr.cz/~peringer/SIMLIB/>}
+\\\url{http://www.fit.vutbr.cz/~peringer/SIMLIB/}
 
 \bibitem{ATX} 
 Intel Corporation: ATX Specification. [online], 2004.
-\\\texttt{URL <http://www.formfactors.org/developer/specs/atx2_2.pdf>}
+\\\url{http://www.formfactors.org/developer/specs/atx2\_2.pdf}
 
 \end{thebibliography}
 
