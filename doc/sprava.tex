@@ -84,13 +84,14 @@ Lukáš Vrabec (xvrabe07) \\
 % sekcia 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Úvod}
-V tejto práci je riešená implementácia modelu hypotetického výrobného podniku
-na produkciu základných dosiek, ktorá bude použitá pre vytvorenie simulačného
-modelu systému.
+V tejto práci je riešená implementácia modelu(\cite{peringer-slidy} str.7) hypotetického
+výrobného podniku na produkciu základných dosiek, ktorá bude použitá pre 
+vytvorenie simulačného modelu(\cite{peringer-slidy} str.46) systému(\cite{peringer-slidy} str.7).
 
-Na základe modelu a simulačných experimentov bude ukázané chovanie systému
-výrobného podniku v podmienkach rôzneho vyťaženia, pridávania jednotlivých
-obslužních liniek.
+Na základe modelu a simulačných experimentov(\cite{peringer-slidy} str.168)
+(ďalej len experimenty) bude ukázané chovanie systému (\cite{peringer-slidy} str.24)
+výrobného podniku v podmienkach rôzneho vyťaženia(\cite{peringer-slidy} str.139),
+pridávania jednotlivých obslužních liniek.
 TODO: scim experimentujeme. 
 
 Cieľom experimentov je demonštrovanie možných optimalizácií na zadanom modely. Kon\-kré\-tne
@@ -125,20 +126,20 @@ ktoré približne odpovedajú reálnemu systému.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Výrobný podnik spracováva požiadavky na výrobu základných dosiek, ktorý pracuje
 v nepretržitej prevádzke. Prvým krokom v procese výroby je vstup dosiek plošných
-spojov (\textit{angl.} printable circuit board, ďalej len PCB) do SMT
+spojov (\textit{angl.} printable circuit board, ďalej len PCB) do SMT\cite{SMT}
 (\textit{angl. surface mount-technology}) liniek, kde dochádza k osadeniu jednotlivých
-SMD (\textit{angl. surface-mount device}) komponent (rezistory, chipset atď.).
+SMD (\textit{angl. surface-mount device})\cite{SMT} komponent (rezistory, chipset atď.).
 SMT linky sa skladajú zo zariadenia pre sieťotlač spájkovacej 
-hmoty (\textit{angl. solder paste screen printer}) kde dochádza k nanášaniu spájkovacej
-hmoty na PCB. Tento proces je vykonávaný 2 až 150 mm/sec [link]. Ďalej pokračuje
-do P\&P (\textit{angl. Pick-and-Place}) prístroja ktorý na PCB umiestni 
-SMD komponenty. Rýchlosť umiestnia SMD komponent na PCB je 0.25 až 0.5 sekundy
-na čip [link]. Osadené komponenty je nutné upevniť. K tomuto účelu sa použije
-pec ktorá pri vysokých teplotách upevní komponenty (spájkovanie pretavením), 
-trvanie približne 5 minút v závisloti na použitom materiále. 
+hmoty (\textit{angl. solder paste screen printer})\cite{screen-printer-DEK} kde
+dochádza k nanášaniu spájkovacej hmoty na PCB. Tento proces je vykonávaný
+2 až 150 mm/sec. Ďalej pokračuje do P\&P (\textit{angl. Pick-and-Place})\cite{smt-PNP}
+prístroja ktorý na PCB umiestni SMD komponenty. Rýchlosť umiestnia SMD komponent
+na PCB je 0.25 až 0.5 sekundy na čip. Osadené komponenty je nutné upevniť.
+K tomuto účelu sa použije pec\cite{reflow-oven} ktorá pri vysokých teplotách upevní komponenty
+(spájkovanie pretavením), trvanie približne 5 minút v závisloti na použitom materiále. 
 
 Proces pokračuje kontrolou nanometrových chýb spojov na PCB. Tento proces je 
-nazývaný AOI (\textit{angl. automated optical insepction}). V prípade výskytu
+nazývaný AOI (\textit{angl. automated optical insepction})\cite{AOI}. V prípade výskytu
 chýb je PCB nutné manuálne opraviť. Po oprave je nutné AOI zopakovať. Tento
 úkon nieje časovo náročny.
 
@@ -157,10 +158,10 @@ Výrobný podnik môže obsahovať niekoľko SMT, DIP, testovích a baliacích l
 
 \subsection{Popis použitých postupov}
 Simulačný model je konzolová aplikácia, naprogramovaná v programovacom jazyku
-C++, podľa požiadaviek zadania. Simulačná knižnica SIMLIB/C++ bola použitá pretože
+C++, podľa požiadaviek zadania. Simulačná knižnica SIMLIB/C++\cite{SIMLIB} bola použitá pretože
 umožnuje objektovo zapísať model, čím je implementácia jednoduchšia a efektívnejšia.
 Z tejto knižnice boli použité aj simulačné nástroje na zber štatistík. Na tvorbu
-tabuliek a grafov bol použitý tabuľkový procesor Microsoft Excel.
+grafov bol použitý nástroj GNUPLOT\cite{gnuplot}.
 
 \subsection{Popis pôvodu použitých metód}
 Bola použitá knižnica SIMLIB/C++, v ktorej sme rozšírili model zariádení a 
@@ -173,11 +174,11 @@ skladov o identifikáciu v ktorej výrobnej linke sa nachádza.
 
 Podľa dostupných informáčních zdrojov sa predpokladá ročná výroba 7 miliónov
 základných dosiek na továreň, čo je približne 21 miliónov základných dosiek
-na spoločnosť. Z toho dôvodu je nutné vytvoriť požiadavku na 19179 kusov deňne.
+na spoločnosť\cite{gigabyte-sprava}. Z toho dôvodu je nutné vytvoriť požiadavku na 19179 kusov deňne.
 PCB sa radia do spoločnej fronty pred vstupom do SMT liniek. Zvolená je tá SMT
 linka na ktorej sa náchádza volné zariadenie pre sieťotlač spájkovacej hmoty.
 Predpokladáme rovnomerné trvanie sieťotlače 30 až 45 sekúnd pri nastavení sieťotlače
-na 10mm/sec a rozmeroch PCB 305x244 mm (ATX model).
+na 10mm/sec a rozmeroch PCB 305x244 mm (ATX model)\cite{ATX}.
 
 PCB sa ďalej radia do fronty P\&P zariadenia v SMT linke v ktorej sa nachádzajú.
 Predpoklad je, že P\&P zariadenie osadí čipy rýchlosťou 0.15 sekundy na čip, pričom
@@ -185,7 +186,7 @@ sa predpokladajú hypotetické základné dosky obsahujúce 240 až 480 SMD komp
 z dôvodu nedostatku informácií. Tento proces bude trvať rovnomerne 36 až 72 sekúnd.
 PCB sa pohybujú po výrobnej linke za sebou cez pec, tento prechod trvá 5 minút.
 
-Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd[LINK], v 
+Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd, v 
 prípade že nastane chyba s pravedepodobnosťou 1\% je doska opravovaná. Dĺžka
 opravy je daná exponencionálnym rozložením so stredom 6 minuty. Opravené PCB
 ktoré musia znova podstúpiť AOI majú vyššiu prioritu ako PCB vstupujúce do AOI 
@@ -221,10 +222,10 @@ a baliacu linku ktoré sú modelované ako sklad. Následne proces predstavujúc
 hotovú základnú dosku opúšta systém.
 
 \subsection{Formy konceptuálneho modelu}
-Linky sú znazornené pomocou samotných petriho sietí, nakoľko prechody medzi linkami
-nebolo možné namodelovať a jednotlivých liniek može byť v systéme niekoľko.
-Jednotlivé petriho siete sa napájajú na prázdne miesto na konci každej
-siete. 
+Linky sú znazornené pomocou samotných petriho sietí(\cite{peringer-slidy} str. 123),
+nakoľko prechody medzi linkami nebolo možné namodelovať a jednotlivých liniek 
+može byť v systéme niekoľko. Jednotlivé petriho siete sa napájajú na prázdne
+miesto na konci každej siete. 
 
 \begin{figure}[!h]
   \centering
@@ -297,14 +298,14 @@ simulačný model sú nasledovné.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Cieľom experimentov s reprezentáciou simulačného modelu bolo zistiť, vyťaženie
 liniek počas výrobného procesu v rámci jedného dňa a schopnosť produkcie 7 miliónov
-dosiek za rok.
+dosiek za rok\cite{gigabyte-sprava}.
 
 Vytvorenie simulačného modelu bolo nutné, nakoľko hypotetický model je príliš
 zložitý na popis a riešenie pomocou analitických rovníc.
 
 \subsection{Postup experimentovania}
 Z dôvodu podania čo najlepšie pozorovateľných výsledkov experimentov, bol 
-generátor pseudonáhodných čísel inicilizovaný hodnotou(\textit{angl. seed})
+generátor pseudonáhodných čísel(\cite{peringer-slidy} str. 97) inicilizovaný hodnotou(\textit{angl. seed})
 aktuálného času. Priebeh experimentov prebiehal tak, že boli modifikované 
 vlastnosti jednotlivých prvkov sýstému alebo boli pridávané/odoberané výrobné
 linky.
@@ -322,9 +323,9 @@ systému.
 Východiskovým experiment pre porovnávanie s ďalšími experimentami.
 Experiment bol spustený so základnými parametrami. Na základe nižšie uvedených histogramoch
 je možné vidiet počet vyrobených dosiek v priebehu dňa, dobu 
-výroby základnej dosky[cislo obrazka]. Ďalej je možné vidiet priemernú dĺžku
-fronty u P\&P zariadení[cislo]. Zvyšné histogramy zobrazujú priemernú a maximálnu
-kapacitu na linkách: SMT [cislo], DIP [cislo], testovacích [číslo] a baliacich [číslo].
+výroby základnej dosky (Obr. 5). Ďalej je možné vidiet priemernú dĺžku
+fronty u P\&P zariadení (Obr. 6). Zvyšné histogramy zobrazujú priemernú a maximálnu
+kapacitu na linkách: SMT (Obr. 7), DIP (Obr. 8), testovacích (Obr. 9) a baliacich (Obr. 10).
 
 \begin{verbatim}
   Vyrobených základných dosiek: 7 000 335 kusov
@@ -534,6 +535,22 @@ GIGA-BYTE Technology Co., Ltd. [online], 2013.
 \bibitem{asus-sprava} 
 ASUSTeK Computer Inc. [online], 2013.
 \\\texttt{URL <http://www.annualreportowl.com/Asus/2013/Annual\%20Report>}
+
+\bibitem{gnuplot} 
+WILLIAMS, T.; KELLEY, C.; LANG, R.: Gnuplot. [online], Naposledy upravené november 2014.
+\\\texttt{URL <http://www.gnuplot.info>}
+
+\bibitem{SMT} 
+WILLIAMS, P.: SURFACE MOUNT COUNCIL. [online], august 1999.
+\\\texttt{URL <http://www.ipc.org/4.0_Knowledge/4.1_Standards/smcstatus.pdf>}
+
+\bibitem{SIMLIB} 
+PERINGER, P.: SIMLIB/C++. [online], Naposledy upravené 27. 03. 2014.
+\\\texttt{URL <http://www.fit.vutbr.cz/~peringer/SIMLIB/>}
+
+\bibitem{ATX} 
+Intel Corporation: ATX Specification. [online], 2004.
+\\\texttt{URL <http://www.formfactors.org/developer/specs/atx2_2.pdf>}
 
 \end{thebibliography}
 
