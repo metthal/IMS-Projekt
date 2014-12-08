@@ -16,7 +16,9 @@
 \usepackage[dvipdf]{graphicx}
 % velikost stranky
 \usepackage[top=3.5cm, left=2.5cm, text={17cm, 24cm}, ignorefoot]{geometry}
-\usepackage{subfigure}
+\usepackage{caption}
+\usepackage{subcaption}
+
 
 \begin{document}
 
@@ -31,7 +33,7 @@
 % \vspace*{1cm}
 \begin{figure}[!h]
   \centering
-  \includegraphics[height=5cm]{logo.eps}
+  \includegraphics[height=5cm]{doc/logo.eps}
 \end{figure}
 \center Fakulta Informačních Technologií \\
 \center Vysoké Učení Technické v Brně \\
@@ -138,7 +140,7 @@ trvanie približne 5 minút v závisloti na použitom materiále.
 Proces pokračuje kontrolou nanometrových chýb spojov na PCB. Tento proces je 
 nazývaný AOI (\textit{angl. automated optical insepction}). V prípade výskytu
 chýb je PCB nutné manuálne opraviť. Po oprave je nutné AOI zopakovať. Tento
-úkon nieje časovo náročny [link].
+úkon nieje časovo náročny.
 
 Následne je PCB umiestnená na DIP (\textit{angl. Dual in-line package})
 linku ktorú predstavuje posuvný pás na ktorom sú manuálne umiesňované 
@@ -178,12 +180,12 @@ Predpokladáme rovnomerné trvanie sieťotlače 30 až 45 sekúnd pri nastavení
 na 10mm/sec a rozmeroch PCB 305x244 mm (ATX model).
 
 PCB sa ďalej radia do fronty P\&P zariadenia v SMT linke v ktorej sa nachádzajú.
-Predpoklad je, že P\&P zariadenie osadí čipy rýchlosťou 0.25 sekundy na čip, pričom
+Predpoklad je, že P\&P zariadenie osadí čipy rýchlosťou 0.15 sekundy na čip, pričom
 sa predpokladajú hypotetické základné dosky obsahujúce 240 až 480 SMD komponent
-z dôvodu nedostatku informácií. Tento proces bude trvať rovnomerne 1 až 2 minuty.
+z dôvodu nedostatku informácií. Tento proces bude trvať rovnomerne 36 až 72 sekúnd.
 PCB sa pohybujú po výrobnej linke za sebou cez pec, tento prechod trvá 5 minút.
 
-Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd, v 
+Ďalej je zahájený proces AOI zariadení s frontov ktorého trvanie je rovnomerne 10 až 14 sekúnd[LINK], v 
 prípade že nastane chyba s pravedepodobnosťou 1\% je doska opravovaná. Dĺžka
 opravy je daná exponencionálnym rozložením so stredom 6 minuty. Opravené PCB
 ktoré musia znova podstúpiť AOI majú vyššiu prioritu ako PCB vstupujúce do AOI 
@@ -226,25 +228,25 @@ siete.
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=18cm]{smt.png}
+  \includegraphics[width=17cm]{doc/smt.png}
   \caption{SMT linka}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=10cm]{dip.png}
+  \includegraphics[width=10cm]{doc/dip.png}
   \caption{DIP linka}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=14cm]{tst.png}
+  \includegraphics[width=14cm]{doc/tst.png}
   \caption{Testovacia linka}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=10cm]{pkg.png}
+  \includegraphics[width=10cm]{doc/pkg.png}
   \caption{Baliaca linka}
 \end{figure}
 
@@ -257,7 +259,7 @@ na výrobu bola použitá trieda \texttt{Event}, tento generátor je aktivovaný
 v čase 0, následne je spušťaný každých 24 hodín. Generátor vytvára požiadavky typu
 \texttt{Board}, ktoré dedia triedu \texttt{Process}.
 
-Doba simulácie je nastavená na 1 deň. Časová jednotka použitá v simulácií je 
+Doba simulácie je nastavená na 1 rok. Časová jednotka použitá v simulácií je 
 sekunda.
 
 \subsection{Mapovanie abstraktného modelu do simulačného modelu}
@@ -293,11 +295,246 @@ simulačný model sú nasledovné.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simulačné experimenty a ich priebeh}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Cieľom experimentov s reprezentáciou simulačného modelu bolo zistiť, vyťaženie
+liniek počas výrobného procesu v rámci jedného dňa a schopnosť produkcie 7 miliónov
+dosiek za rok.
+
+Vytvorenie simulačného modelu bolo nutné, nakoľko hypotetický model je príliš
+zložitý na popis a riešenie pomocou analitických rovníc.
+
+\subsection{Postup experimentovania}
+Z dôvodu podania čo najlepšie pozorovateľných výsledkov experimentov, bol 
+generátor pseudonáhodných čísel inicilizovaný hodnotou(\textit{angl. seed})
+aktuálného času. Priebeh experimentov prebiehal tak, že boli modifikované 
+vlastnosti jednotlivých prvkov sýstému alebo boli pridávané/odoberané výrobné
+linky.
+
+\subsection{Popis experimentov}
+Prvý experiment vykonávame so základnou konfigurácou simulačného modelu, z toho 
+dôvodu sa nazýva referenčny experiment. 
+
+Všetky ďalsie experimenty budú výchádzať z referenčného. Z výsledkov referenčného
+experimentu budu vyvodené závery, na základe ktorých budu vykonávané ostané experimenty.
+Dôraz bude kladený na zmenu parametrov, ktoré sú nachýlené k zmenám vlastností
+systému.
+
+\subsubsection{Referenčný experiment}
+Východiskovým experiment pre porovnávanie s ďalšími experimentami.
+Experiment bol spustený so základnými parametrami. Na základe nižšie uvedených histogramoch
+je možné vidiet počet vyrobených dosiek v priebehu dňa, dobu 
+výroby základnej dosky[cislo obrazka]. Ďalej je možné vidiet priemernú dĺžku
+fronty u P\&P zariadení[cislo]. Zvyšné histogramy zobrazujú priemernú a maximálnu
+kapacitu na linkách: SMT [cislo], DIP [cislo], testovacích [číslo] a baliacich [číslo].
+
+\begin{verbatim}
+  Vyrobených základných dosiek: 7 000 335 kusov
+\end{verbatim}
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/1_hist1.eps}
+  \caption{počet dosiek vyrobených za deň}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/1_hist2.eps}
+    \caption{doba výroby základnej dosky}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/1_hist3.eps}
+  \caption{priemerná dĺžka fronty u P\&P}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/1_hist4.eps}
+    \caption{priemerná a maximalna kap. na DIP}
+  \end{minipage}
+\end{figure}
+
+\newpage
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/1_hist5.eps}
+  \caption{priemerná a maximalna kap. na TST}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/1_hist6.eps}
+    \caption{priemerná a maximalna kap. na PKG}
+  \end{minipage}
+\end{figure}
+
+Z prvého histogramu je vidieť že výrobný podnik pracuje v čase od 00:00 do 16:00 hod.
+V čase 16:00 až 24:00 výrobná linka čaká na prijatie novej požiadavky, čím nieje 
+využitá celá jeho schopnosť produkovať základné dosky. Podľa druhého histogramu,
+je vidieť že niektoré dosky sú v výrobnom procese 4 až 6 hod, čo znamená že výrobný
+proces je v niektorej jeho časti výrazne spomalovaný. K spomalovaniu dochádza 
+vo fronte u zariadenia P\&P[link hist.], ktoré je najpomalšie z celej SMT linky.
+Zo zvýšních histogramov je vidieť že spomalenie následne spôsobuje že DIP, baliacie aj
+testovacie linky sú využité len z časti.
+
+\newpage
+
+\subsubsection{Zrýchlenie P\&P zariadení}
+Pri druhom experimente bol kladený dôraz na zrýchlenie P\&P zariadenia 
+pričom obsluha dosky trvala rovnomerne 25 až 40 sekúnd, čo 
+znížilo veľkosť P\&P front v systéme. V tomto prípade prišlo k veľmi
+výraznému zníženiu obsluhy oproti referenčnému experimentu. V nižšie uvedených 
+histogramoch možne vidieť lepšie využitie kapacity pri DIP, testovacích a baliacích
+linkách, avšak stále niesú využité naplno. 
+
+\begin{verbatim}
+  Vyrobených základných dosiek: 7 000 335 kusov
+\end{verbatim}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/2_hist1.eps}
+  \caption{počet dosiek vyrobených za deň}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/2_hist2.eps}
+    \caption{doba výroby základnej dosky za min.}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/2_hist3.eps}
+  \caption{priemerná dĺžka fronty u P\&P}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/2_hist4.eps}
+    \caption{priemerná a maximalna kap. na DIP}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/2_hist5.eps}
+  \caption{priemerná a maximalna kap. na TST}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/2_hist6.eps}
+    \caption{priemerná a maximalna kap. na PKG}
+  \end{minipage}
+\end{figure}
+
+\newpage
+
+\subsubsection{Zvýšená produkcia}
+
+\begin{verbatim}
+  Vyrobených základných dosiek: 12 775 00 kusov
+\end{verbatim}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/3_hist1.eps}
+  \caption{počet dosiek vyrobených za deň}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/3_hist2.eps}
+    \caption{doba výroby základnej dosky za min.}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/3_hist3.eps}
+  \caption{priemerná dĺžka fronty u P\&P}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/3_hist4.eps}
+    \caption{priemerná a maximalna kap. na DIP}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.45\linewidth}
+  \centering
+  \includegraphics[width=8cm]{doc/3_hist5.eps}
+  \caption{priemerná a maximalna kap. na TST}
+  \end{minipage}
+  \quad
+  \begin{minipage}{0.45\linewidth}
+    \centering
+    \includegraphics[width=8cm]{doc/3_hist6.eps}
+    \caption{priemerná a maximalna kap. na PKG}
+  \end{minipage}
+\end{figure}
+
+\newpage
 
 % sekcia 6
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Zhrnutie simulačných experimentov a záver}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{thebibliography}{9}
+
+\bibitem{peringer-slidy} 
+PERINGER, P.: Modelování a simulace, september 2014, (VUT FIT v Brne), IMS - slajdy z
+prednášok.
+
+\bibitem{screen-printer-DEK} 
+DEK Printing Machines Limited. [online], 2000.
+\\\texttt{URL <http://www.pcbtechnology.pl/wp-content/uploads/2014/02/dek-infinity-spec.pdf>}
+
+\bibitem{smt-PNP} 
+FUJI MACHINE MFG. CO., LTD. [online], 2013.
+\\\texttt{URL <https://smt.fuji.co.jp/e/products/mounter/detail.php?id=8>}
+
+\bibitem{reflow-oven} 
+IXYS Corporation. [online], 2006.
+\\\texttt{URL <http://www.ixys.com/Documents/AppNotes/IXAN0059.pdf>}
+
+\bibitem{AOI} 
+Nordson YESTECH. [online].
+\\\texttt{URL <http://www.nordson.com/en-us/divisions/yestech/Literature/NYT-FXSeries\_DS\%28L\%29.pdf>}
+
+\bibitem{gigabyte-sprava} 
+GIGA-BYTE Technology Co., Ltd. [online], 2013.
+\\\texttt{URL <http://www.gigabyte.com/fileupload/sitemap/36/images/AnnualReportEng-2013.pdf>}
+
+\bibitem{asus-sprava} 
+ASUSTeK Computer Inc. [online], 2013.
+\\\texttt{URL <http://www.annualreportowl.com/Asus/2013/Annual\%20Report>}
+
+\end{thebibliography}
 
 \end{document}
