@@ -18,8 +18,8 @@ PACKED_FILES = $(SRCS) Makefile sprava.pdf
 TEX = pdflatex -interaction nonstopmode
 TEX_FILE = doc/sprava.tex
 
-#build: release
-build: debug
+build: release
+#build: debug
 
 release: CXXFLAGS += $(CXXFLAGS_RELEASE)
 release: $(OBJS)
@@ -41,7 +41,7 @@ run: build
 	./$(PROJECT) --out exp_pro.out --req 35000 --smt 25 --dip 3 --tst 6 --pkg 3
 	@echo ""
 	@echo "Experiment 4 - Zvysena chybovost"
-	./$(PROJECT) --out exp_err.out --err 15 15
+	./$(PROJECT) --out exp_err.out --err 30 30
 
 clean:
 	$(RM) $(OBJS) $(PROJECT) sprava.*
